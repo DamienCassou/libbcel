@@ -1,0 +1,10 @@
+{
+  "configurations": [
+    {
+      "name": "Node",
+      "type": "node",
+      "command": "node ./bin/basecamp-proxy",
+      "inspect-brk": true
+    }
+  ]
+}

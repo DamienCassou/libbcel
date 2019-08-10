@@ -1,0 +1,17 @@
+#!/usr/bin/env node
+
+const path = require("path");
+
+const port = process.argv[2];
+
+if (!port) {
+  throw new Error("Missing port argument");
+}
+
+const proxyPath = path.resolve(__dirname, "..", "src", "index.js");
+
+require(proxyPath).start(port);
+
+// Local Variables:
+// mode: js
+// End:
