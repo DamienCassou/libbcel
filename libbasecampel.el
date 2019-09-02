@@ -100,8 +100,7 @@ when you are on the basecamp website."
                (:include libbasecampel-entity
                          (name nil :alist-key-name title))
                (:constructor libbasecampel-todo-create)
-               (:conc-name libbasecampel-todo-))
-  (title nil :read-only t))
+               (:conc-name libbasecampel-todo-)))
 
 (cl-defmethod libbasecampel-name ((entity libbasecampel-entity))
   (libbasecampel--entity-name entity))
