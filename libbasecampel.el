@@ -255,12 +255,5 @@ done.  Otherwise, call CALLBACK immediately."
    entities
    callback))
 
-;; (libbasecampel-proxy-stop)
-;; (libbasecampel-proxy-start (lambda () (message "started")))
-;; ;; Message board
-;; (libbasecampel-proxy-get-url
-;;  "https://3.basecampapi.com/4201305/buckets/13189984/todosets/1977927385/todolists.json"
-;;  (lambda (response) (message "%s" response)))
-
 (provide 'libbasecampel)
 ;;; libbasecampel.el ends here
