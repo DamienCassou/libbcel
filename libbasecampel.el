@@ -100,8 +100,7 @@ when you are on the basecamp website."
                (:include libbasecampel-entity
                          (name nil :alist-key-name title))
                (:constructor libbasecampel-todo-create)
-               (:conc-name libbasecampel-todo-))
-  (title nil :read-only t))
+               (:conc-name libbasecampel-todo-)))
 
 (cl-defmethod libbasecampel-name ((entity libbasecampel-entity))
   (libbasecampel--entity-name entity))
@@ -261,6 +260,31 @@ done.  Otherwise, call CALLBACK immediately."
    #'libbasecampel-children
    entities
    callback))
+
+(defun libbasecampel-completing-read (prompt entities &optional transformer)
+  "PROMPT user to select one entity among ENTITIES.
+
+Transform each entity to a string with TRANSFORMER,
+`libbasecampel-name' if nil."
+  (let* ((transformer (or transformer #'libbasecampel-name))
+         (map (make-hash-table :test 'equal :size (length entities)))
+         (entity-strings (mapcar (lambda (entity) (funcall transformer entity)) entities)))
+    (cl-mapcar (lambda (entity entity-string)
+                 (puthash entity-string entity map))
+               entities entity-strings)
+    (let ((entity-string (completing-read prompt entity-strings nil t)))
+      (gethash entity-string map))))
+
+(defun libbasecampel-completing-read-entity (function prompt entity &optional transformer)
+  "Call FUNCTION after prompting for a child of ENTITY.
+
+Pass PROMPT, the elements of ENTITY and TRANSFORMER to
+`libbasecampel-completing-read'."
+  (libbasecampel-children
+   entity
+   (lambda (entities)
+     (funcall function
+              (libbasecampel-completing-read prompt entities transformer)))))
 
 (provide 'libbasecampel)
 ;;; libbasecampel.el ends here
