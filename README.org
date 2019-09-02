@@ -1,0 +1,49 @@
+* libbasecampel
+
+  #+BEGIN_HTML
+      <p>
+        <a href="https://stable.melpa.org/#/libbasecampel">
+          <img alt="MELPA Stable" src="https://stable.melpa.org/packages/libbasecampel-badge.svg"/>
+        </a>
+
+        <a href="https://melpa.org/#/libbasecampel">
+          <img alt="MELPA" src="https://melpa.org/packages/libbasecampel-badge.svg"/>
+        </a>
+
+        <a href="https://gitlab.petton.fr/basecampel/libbasecampel/commits/master">
+          <img alt="pipeline status" src="https://gitlab.petton.fr/basecampel/libbasecampel/badges/master/pipeline.svg" />
+        </a>
+      </p>
+  #+END_HTML
+
+
+** Summary
+
+The package libbasecampel is an Emacs library to interact with
+[[https://basecamp.com][Basecamp]], a project management web application.
+
+** Installing
+
+The package libbasecampel depends on a JavaScript proxy which is in
+the same repository, in the ~proxy/~ directory. If you got
+libbasecampel by cloning the Git project, you already have the
+proxy. Otherwise, you probably have to install the proxy manually from
+[[https://www.npmjs.com/package/basecamp-proxy][the npm package]]:
+
+#+begin_src text
+$ npm install -g basecamp-proxy
+#+end_src
+
+In all cases, you first need to read the [[file:proxy/README.md][proxy's documentation]].
+
+** License
+
+See [[file:COPYING][COPYING]]. Copyright (c) 2019 Damien Cassou.
+
+  #+BEGIN_HTML
+  <a href="https://liberapay.com/DamienCassou/donate">
+    <img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg">
+  </a>
+  #+END_HTML
+
+#  LocalWords:  Basecampel MPD minibuffer
