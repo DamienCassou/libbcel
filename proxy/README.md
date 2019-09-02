@@ -6,6 +6,12 @@ with JSON.
 
 ## Usage
 
+You first need to install the proxy's dependencies:
+
+```session
+yarn
+```
+
 Start the proxy:
 
 ```session
