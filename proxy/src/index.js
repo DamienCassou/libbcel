@@ -36,7 +36,6 @@ function receive(str) {
     let data;
     try {
       data = JSON.parse(input.substring(0, linefeedPos));
-      console.error("received: ", data);
       input = input.substring(++linefeedPos);
       linefeedPos = input.indexOf("\n");
     } catch (e) {
