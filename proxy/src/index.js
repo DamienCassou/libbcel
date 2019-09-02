@@ -2,8 +2,9 @@ const { createServer } = require("net");
 const respond = require("./respond");
 
 let socket;
+let input = "";
 
-const start = ({port, account_id}) => {
+function start({ port, account_id }) {
   require("./connection").set_account_id(account_id);
 
   let server = createServer(sock => {
@@ -19,15 +20,14 @@ const start = ({port, account_id}) => {
   server.listen(port, () => {
     console.log(`Basecamp proxy listening on ${port}`);
   });
-};
+}
 
-const stop = () => {
+function stop() {
   send({ message: "closing" });
   process.exit();
-};
+}
 
-let input = "";
-const receive = str => {
+function receive(str) {
   input += str;
 
   let linefeedPos = input.indexOf("\n");
@@ -40,35 +40,35 @@ const receive = str => {
       input = input.substring(++linefeedPos);
       linefeedPos = input.indexOf("\n");
     } catch (e) {
-      error()(`Invalid JSON data received: "${input}"`);
+      error({ error: `Invalid JSON data received: "${input}"` });
       return;
     }
 
     if (!data.id) {
-      error()("Missing id from JSON data");
+      error({ error: "Missing id from JSON data" });
       return;
     }
 
     respond(data)
       .then(value => {
-        success(data.id)(value);
+        success({ id: data.id, payload: value });
       })
       .catch(err => {
-        error(data.id)(err.message);
+        error({ id: data.id, error: err.message });
       });
   }
-};
+}
 
-const send = data => {
+function send(data) {
   socket.write(`${JSON.stringify(data)}\n`);
-};
+}
 
-const error = id => error => {
+function error({ id, error }) {
   send({ id, type: "error", payload: { error } });
-};
+}
 
-const success = id => (payload = {}) => {
+function success({ id, payload = {} }) {
   send({ id, type: "success", payload });
-};
+}
 
 module.exports = { start, stop, success, error, send };
