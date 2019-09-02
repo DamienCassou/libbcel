@@ -55,9 +55,9 @@
 (defvar libbasecampel-proxy--application nil
   "The client connection as returned by `json-process-client-start'.")
 
-(defun libbasecampel-proxy-start (callback)
+(defun libbasecampel-proxy-start (account-id callback)
   "Start a basecamp process and store it as the client process.
-Evaluate CALLBACK once the proxy is started."
+Pass ACCOUNT-ID to the process.  Evaluate CALLBACK once the proxy is started."
   (interactive (list (lambda () (message "libbasecampel-proxy is started"))))
   (when (libbasecampel-proxy-process-live-p)
     (user-error "A basecamp process is already running"))
@@ -73,7 +73,7 @@ Evaluate CALLBACK once the proxy is started."
            :tcp-started-callback callback
            :exec-callback #'libbasecampel-proxy--handle-message
            :debug "*libbasecampel-debug-log*"
-           :args (list (number-to-string libbasecampel-proxy--process-port))))))
+           :args (list (number-to-string libbasecampel-proxy--process-port) account-id)))))
 
 (defun libbasecampel-proxy-stop ()
   "Stop the libbasecampel process."

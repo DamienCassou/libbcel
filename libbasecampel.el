@@ -45,6 +45,12 @@
   "Set your basecamp client secret here."
   :type 'string)
 
+(defcustom libbasecampel-account-id nil
+  "The account id to connect to.
+This is the first number appearing after basecamp.com in the URL
+when you are on the basecamp website."
+  :type 'string)
+
 
 ;; Structures
 
@@ -181,6 +187,7 @@ done.  Otherwise, call CALLBACK immediately."
   "Start a connection to the proxy, call CALLBACK when done."
   (interactive (list (lambda () (message "Connection to basecamp established."))))
   (libbasecampel-proxy-start
+   libbasecampel-account-id
    (lambda ()
      (libbasecampel-proxy-send
       `(("type" . "meta")
