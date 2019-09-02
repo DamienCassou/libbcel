@@ -3,7 +3,11 @@ let oauth = require("./oauth");
 
 let auth_token = undefined;
 
-const account_id = "4201305";
+let account_id = undefined;
+
+function set_account_id(anId) {
+  account_id = anId;
+}
 
 async function generate_auth_token({ client_id, client_secret, port }) {
   auth_token = oauth.get_auth_token({ client_id, client_secret, port });
@@ -12,6 +16,10 @@ async function generate_auth_token({ client_id, client_secret, port }) {
 }
 
 async function get({ url, path, params }) {
+  if (!account_id) {
+    throw new Error("No account_id set.");
+  }
+
   let uri = url || `https://3.basecampapi.com/${account_id}/${path}`;
 
   if (!auth_token) {
@@ -38,4 +46,4 @@ async function get({ url, path, params }) {
   return response.body;
 }
 
-module.exports = { get, generate_auth_token };
+module.exports = { get, generate_auth_token, set_account_id };

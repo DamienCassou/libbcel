@@ -1,5 +1,4 @@
-const { promisify } = require("util");
-const exec = promisify(require("child_process").exec);
+const open = require("open");
 
 const express = require("express");
 const request = require("request-promise-native");
@@ -20,7 +19,7 @@ function backchannel_request({ client_id, client_secret, redirect_uri, code }) {
 
 function openWebBrowser({ client_id, redirect_uri }) {
   let uri = `https://launchpad.37signals.com/authorization/new?type=web_server&client_id=${client_id}&redirect_uri=${redirect_uri}`;
-  return promisify(exec)(`xdg-open '${uri}'`);
+  return open(uri);
 }
 
 function get_auth_token({ client_id, client_secret, port = 9321 }) {

@@ -4,16 +4,16 @@
   "main": "src/index.js",
   "license": "MIT",
   "dependencies": {
-    "body-parser": "^1.19.0",
     "express": "^4.17.1",
+    "open": "^6.4.0",
     "request": "^2.88.0",
+    "request-promise-native": "^1.0.7",
     "semver": "^6.3.0"
   },
   "devDependencies": {
-    "eslint": "^6.0.1",
-    "eslint-config-prettier": "^6.0.0",
+    "eslint": "^6.3.0",
+    "eslint-config-prettier": "^6.1.0",
     "eslint-plugin-prettier": "^3.1.0",
-    "prettier": "^1.18.2",
-    "request-promise-native": "^1.0.7"
+    "prettier": "^1.18.2"
   }
 }
