@@ -3,14 +3,15 @@
 const path = require("path");
 
 const port = process.argv[2];
+const account_id = process.argv[3];
 
-if (!port) {
-  throw new Error("Missing port argument");
+if (!port || !account_id) {
+  throw new Error("Usage: basecamp-proxy <port> <account_id>");
 }
 
 const proxyPath = path.resolve(__dirname, "..", "src", "index.js");
 
-require(proxyPath).start(port);
+require(proxyPath).start({ port, account_id });
 
 // Local Variables:
 // mode: js

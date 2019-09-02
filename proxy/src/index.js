@@ -3,7 +3,9 @@ const respond = require("./respond");
 
 let socket;
 
-const start = port => {
+const start = ({port, account_id}) => {
+  require("./connection").set_account_id(account_id);
+
   let server = createServer(sock => {
     socket = sock;
 
