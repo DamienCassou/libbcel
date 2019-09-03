@@ -201,6 +201,12 @@ done.  Otherwise, call CALLBACK immediately."
    (lambda ()
      (libbasecampel-proxy-send message callback))))
 
+(defun libbasecampel-get-url (url callback)
+  "Do a GET request on URL and evaluate CALLBACK with the result."
+  (libbasecampel--ensure-connection
+   (lambda ()
+     (libbasecampel-proxy-get-url url callback))))
+
 
 ;;; Public functions
 
@@ -238,10 +244,10 @@ done.  Otherwise, call CALLBACK immediately."
      (t (user-error "Libbasecampel: unknown tool type `%s" type)))))
 
 (cl-defmethod libbasecampel-children ((tool libbasecampel-tool) callback)
-  (libbasecampel-proxy-get-url
+  (libbasecampel-get-url
    (libbasecampel-tool-url tool)
    (lambda (tool-data)
-     (libbasecampel-proxy-get-url
+     (libbasecampel-get-url
       (map-elt tool-data (libbasecampel--tool-child-url-key tool))
       (lambda (children-data)
         (funcall callback
@@ -250,7 +256,7 @@ done.  Otherwise, call CALLBACK immediately."
                   children-data)))))))
 
 (cl-defmethod libbasecampel-children ((todolist libbasecampel-todolist) callback)
-  (libbasecampel-proxy-get-url
+  (libbasecampel-get-url
    (libbasecampel-todolist-todos-url todolist)
    (lambda (todos-data)
      (funcall callback (libbasecampel--create-instances-from-data 'libbasecampel-todo todos-data)))))
