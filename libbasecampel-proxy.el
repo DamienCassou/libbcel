@@ -48,7 +48,7 @@
   "Process executable."
   :type 'file)
 
-(defcustom libbasecampel-proxy--process-port 1234
+(defcustom libbasecampel-proxy-process-port 1234
   "The port to which Emacs should connect to the JS proxy."
   :type 'number)
 
@@ -68,12 +68,12 @@ Pass ACCOUNT-ID to the process.  Evaluate CALLBACK once the proxy is started."
           (json-process-client-start-with-id
            :name "libbasecampel"
            :executable executable
-           :port libbasecampel-proxy--process-port
+           :port libbasecampel-proxy-process-port
            :started-regexp "Basecamp proxy listening"
            :tcp-started-callback callback
            :exec-callback #'libbasecampel-proxy--handle-message
            :debug "*libbasecampel-debug-log*"
-           :args (list (number-to-string libbasecampel-proxy--process-port) account-id)))))
+           :args (list (number-to-string libbasecampel-proxy-process-port) account-id)))))
 
 (defun libbasecampel-proxy-stop ()
   "Stop the libbasecampel process."
