@@ -22,13 +22,33 @@ async function get({ url, path, params }) {
 
   let uri = url || `https://3.basecampapi.com/${account_id}/${path}`;
 
+  let response = await _doGet({ uri, params });
+  let result = response.body;
+
+  // https://github.com/basecamp/bc3-api/#pagination. If there are
+  // more results, fetch the next batch and ignore the others:
+  if (response.headers.link) {
+    const link = response.headers.link;
+    const semiColonPos = link.indexOf(">");
+    const next = link.substring(1, semiColonPos);
+
+    if (next) {
+      let responseNext = await _doGet({ uri: next });
+      result = [...result, ...responseNext.body];
+    }
+  }
+
+  return result;
+}
+
+async function _doGet({ uri, params }) {
   if (!auth_token) {
     throw new Error(
       "No auth token set yet. Consider using generate_auth_token() first."
     );
   }
 
-  let response = await request.get({
+  return request.get({
     json: true,
     uri,
     resolveWithFullResponse: true,
@@ -38,12 +58,6 @@ async function get({ url, path, params }) {
     },
     qs: params
   });
-
-  // if (response.headers.link) {
-  //   console.log(`D'autres réponses à lire dans ${response.headers.link}`);
-  // }
-
-  return response.body;
 }
 
 module.exports = { get, generate_auth_token, set_account_id };
