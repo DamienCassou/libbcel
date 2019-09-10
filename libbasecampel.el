@@ -28,7 +28,8 @@
 
 ;;; Code:
 
-(require 'libbasecampel-proxy)
+(require 'libbasecampel-oauth)
+(require 'libbasecampel-client)
 
 
 ;; Configuration
@@ -111,7 +112,18 @@ when you are on the basecamp website."
   (libbasecampel--entity-id entity))
 
 
+;;; Private variables
+
+(defvar libbasecampel--oauth-store nil
+  "Remembers the OAuth authentication data.")
+
+
 ;;; Private functions
+
+(defun libbasecampel--oauth-store ()
+  "Return the OAuth authentication data."
+  (or libbasecampel--oauth-store
+      (setq libbasecampel--oauth-store (libbasecampel-oauth-get-store libbasecampel-client-id libbasecampel-client-secret))))
 
 (defun libbasecampel--async-mapcar (mapfn list callback)
   "Apply MAPFN to each element of LIST and pass result to CALLBACK.
@@ -176,38 +188,19 @@ computing for the all elements of LIST."
   (mapcar (lambda (entity-data) (libbasecampel--create-instance-from-data struct-type entity-data))
           entities-data))
 
-(defun libbasecampel--ensure-connection (callback)
-  "Start a connection if there is none yet.
-If a connection has to be started, call CALLBACK when
-done.  Otherwise, call CALLBACK immediately."
-  (if (libbasecampel-proxy-process-live-p)
-      (funcall callback)
-    (libbasecampel-start callback)))
-
-(defun libbasecampel-start (callback)
-  "Start a connection to the proxy, call CALLBACK when done."
-  (interactive (list (lambda () (message "Connection to basecamp established."))))
-  (libbasecampel-proxy-start
-   libbasecampel-account-id
-   (lambda ()
-     (libbasecampel-proxy-send
-      `(("type" . "meta")
-        ("action" . "generate_auth_token")
-        ("client_id" . ,libbasecampel-client-id)
-        ("client_secret" . ,libbasecampel-client-secret))
-      (lambda (_) (funcall callback))))))
-
-(defun libbasecampel-send (message callback)
-  "Send MESSAGE to the proxy and execute CALLBACK with the answer as argument."
-  (libbasecampel--ensure-connection
-   (lambda ()
-     (libbasecampel-proxy-send message callback))))
+(defun libbasecampel-get-path (path &optional callback)
+  "Execute CALLBACK with the result of a GET call to PATH."
+  (libbasecampel-oauth-get-access-token
+   (libbasecampel--oauth-store)
+   (lambda (access-token)
+     (libbasecampel-client-get-path access-token libbasecampel-account-id path callback))))
 
 (defun libbasecampel-get-url (url callback)
   "Do a GET request on URL and evaluate CALLBACK with the result."
-  (libbasecampel--ensure-connection
-   (lambda ()
-     (libbasecampel-proxy-get-url url callback))))
+  (libbasecampel-oauth-get-access-token
+   (libbasecampel--oauth-store)
+   (lambda (access-token)
+     (libbasecampel-client-get-url access-token url callback))))
 
 
 ;;; Public functions
@@ -217,10 +210,13 @@ done.  Otherwise, call CALLBACK immediately."
 
 (cl-defmethod libbasecampel-children ((_entity (eql projects)) callback)
   "Execute CALLBACK with the list of all projects as parameter."
-  (libbasecampel-send
-   '(("type" . "projects") ("action" . "find"))
+  (libbasecampel-get-path
+   "/projects.json"
    (lambda (projects-data)
-     (funcall callback (libbasecampel--create-instances-from-data 'libbasecampel-project projects-data)))))
+     (funcall callback
+              (libbasecampel--create-instances-from-data
+               'libbasecampel-project
+               projects-data)))))
 
 (cl-defmethod libbasecampel-children ((project libbasecampel-project) callback)
   (funcall
