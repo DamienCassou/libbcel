@@ -86,7 +86,8 @@ when you are on the basecamp website."
                (:include libbasecampel-entity
                          (name nil :alist-key-name subject))
                (:constructor libbasecampel-message-create)
-               (:conc-name libbasecampel-message-)))
+               (:conc-name libbasecampel-message-))
+  (content nil :read-only t))
 
 (cl-defstruct (libbasecampel-todolist
                (:include libbasecampel-entity)
@@ -100,7 +101,8 @@ when you are on the basecamp website."
                (:include libbasecampel-entity
                          (name nil :alist-key-name title))
                (:constructor libbasecampel-todo-create)
-               (:conc-name libbasecampel-todo-)))
+               (:conc-name libbasecampel-todo-))
+  (description nil :read-only t))
 
 (cl-defmethod libbasecampel-name ((entity libbasecampel-entity))
   (libbasecampel--entity-name entity))
