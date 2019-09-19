@@ -4,7 +4,7 @@
 
 ;; Author: Damien Cassou <damien@cassou.me>
 ;; Url: https://gitlab.petton.fr/bcel/libbcel
-;; Package-requires: ((emacs "26.1") (json-process-client "0.2.0"))
+;; Package-requires: ((emacs "26.1") (request "0.3.1"))
 ;; Version: 0.2.0
 
 ;; This program is free software; you can redistribute it and/or modify
