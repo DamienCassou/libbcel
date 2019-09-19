@@ -22,19 +22,30 @@
 The package libbasecampel is an Emacs library to interact with
 [[https://basecamp.com][Basecamp]], a project management web application.
 
-** Installing
+** Authentication
 
-The package libbasecampel depends on a JavaScript proxy which is in
-the same repository, in the ~proxy/~ directory. If you got
-libbasecampel by cloning the Git project, you already have the
-proxy. Otherwise, you probably have to install the proxy manually from
-[[https://www.npmjs.com/package/basecamp-proxy][the npm package]]:
+To make libbasecampel work, you first have to give it access to your
+Basecamp account. This is done through OAUTH2. If you already have a
+client id and secret, skip the next section. Otherwise, keep reading.
 
-#+begin_src text
-$ npm install -g basecamp-proxy
-#+end_src
+*** Obtaining a client id and secret
 
-In all cases, you first need to read the [[file:proxy/README.md][proxy's documentation]].
+Login to [[https://basecamp.com/]] and register an application at
+[[https://launchpad.37signals.com/integrations]]. You can use whatever
+values you want but you should at least:
+
+- check "Basecamp 3" in the "Products" section;
+- set the redirect URI as "http://localhost:9321". You can use a
+  different port if you want to.
+
+You'll be assigned a client id and client secret. Save that somewhere
+so you can skip this step next time.
+
+*** Authenticating
+
+You have a client id, client secret and port number for the redirect
+URI (default is 9321). 
+
 
 ** License
 

@@ -1,4 +1,4 @@
-ELPA_DEPENDENCIES=package-lint json-process-client
+ELPA_DEPENDENCIES=package-lint request
 
 ELPA_ARCHIVES=melpa
 
