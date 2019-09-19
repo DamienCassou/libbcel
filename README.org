@@ -1,17 +1,17 @@
-* libbasecampel
+* libbcel
 
   #+BEGIN_HTML
       <p>
-        <a href="https://stable.melpa.org/#/libbasecampel">
-          <img alt="MELPA Stable" src="https://stable.melpa.org/packages/libbasecampel-badge.svg"/>
+        <a href="https://stable.melpa.org/#/libbcel">
+          <img alt="MELPA Stable" src="https://stable.melpa.org/packages/libbcel-badge.svg"/>
         </a>
 
-        <a href="https://melpa.org/#/libbasecampel">
-          <img alt="MELPA" src="https://melpa.org/packages/libbasecampel-badge.svg"/>
+        <a href="https://melpa.org/#/libbcel">
+          <img alt="MELPA" src="https://melpa.org/packages/libbcel-badge.svg"/>
         </a>
 
-        <a href="https://gitlab.petton.fr/basecampel/libbasecampel/commits/master">
-          <img alt="pipeline status" src="https://gitlab.petton.fr/basecampel/libbasecampel/badges/master/pipeline.svg" />
+        <a href="https://gitlab.petton.fr/bcel/libbcel/commits/master">
+          <img alt="pipeline status" src="https://gitlab.petton.fr/bcel/libbcel/badges/master/pipeline.svg" />
         </a>
       </p>
   #+END_HTML
@@ -19,12 +19,12 @@
 
 ** Summary
 
-The package libbasecampel is an Emacs library to interact with
+The package libbcel is an Emacs library to interact with
 [[https://basecamp.com][Basecamp]], a project management web application.
 
 ** Authentication
 
-To make libbasecampel work, you first have to give it access to your
+To make libbcel work, you first have to give it access to your
 Basecamp account. This is done through OAUTH2. If you already have a
 client id and secret, skip the next section. Otherwise, keep reading.
 
@@ -57,4 +57,4 @@ See [[file:COPYING][COPYING]]. Copyright (c) 2019 Damien Cassou.
   </a>
   #+END_HTML
 
-#  LocalWords:  Basecampel MPD minibuffer
+#  LocalWords:  Bcel MPD minibuffer
