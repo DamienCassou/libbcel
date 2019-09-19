@@ -1,9 +1,9 @@
-;;; libbasecampel-oauth.el --- Connects to basecamp API through oauth  -*- lexical-binding: t; -*-
+;;; libbcel-oauth.el --- Connects to basecamp API through oauth  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2019  Damien Cassou
 
 ;; Author: Damien Cassou <damien@cassou.me>
-;; Url: https://gitlab.petton.fr/basecampel/libbasecampel
+;; Url: https://gitlab.petton.fr/bcel/libbcel
 ;; Package-requires: ((emacs "26.1"))
 ;; Version: 0.2.0
 
@@ -33,15 +33,15 @@
 
 ;;; Configuration
 
-(defgroup libbasecampel-oauth nil
+(defgroup libbcel-oauth nil
   "Group for OAuth authentication to Basecamp."
-  :group 'libbasecampel)
+  :group 'libbcel)
 
-(defcustom libbasecampel-oauth-store-filename (concat user-emacs-directory "libbasecampel-oauth.store")
+(defcustom libbcel-oauth-store-filename (concat user-emacs-directory "libbcel-oauth.store")
   "Filename where Basecamp 3 OAuth tokens are stored."
   :type 'file)
 
-(defcustom libbasecampel-oauth-local-http-port 9321
+(defcustom libbcel-oauth-local-http-port 9321
   "The port number used for the redirect uri.
 
 This number should be specified when defining the integration on
@@ -51,16 +51,16 @@ the basecamp website."
 
 ;;; OAuth2 client protocol
 
-(defun libbasecampel-oauth--kill-process (process)
+(defun libbcel-oauth--kill-process (process)
   "Terminate the network PROCESS."
   (stop-process process)
   (delete-process process))
 
-(defun libbasecampel-oauth--make-http-server (client-id client-secret callback)
+(defun libbcel-oauth--make-http-server (client-id client-secret callback)
   "Create a network process listening for HTTP connections.
 
 The port the server listens to is
-`libbasecampel-oauth-local-http-port'.
+`libbcel-oauth-local-http-port'.
 
 CLIENT-ID and CLIENT-SECRET are provided by basecamp for each
 integration.
@@ -68,23 +68,23 @@ integration.
 CALLBACK is executed with the authentication data if the OAUTH
 authentication terminates successfully."
   (let ((http-server-process))
-    (let ((kill-process-fn (lambda () (libbasecampel-oauth--kill-process http-server-process))))
+    (let ((kill-process-fn (lambda () (libbcel-oauth--kill-process http-server-process))))
       (setq http-server-process
             (make-network-process
              :server t
-             :name "libbasecampel-oauth-http-server"
-             :service libbasecampel-oauth-local-http-port
-             :buffer (generate-new-buffer "*libbasecampel-oauth-http-server*")
+             :name "libbcel-oauth-http-server"
+             :service libbcel-oauth-local-http-port
+             :buffer (generate-new-buffer "*libbcel-oauth-http-server*")
              :filter (apply-partially
-                      #'libbasecampel-oauth--http-server-filter
+                      #'libbcel-oauth--http-server-filter
                       client-id
                       client-secret
-                      (libbasecampel-oauth--redirect-uri)
+                      (libbcel-oauth--redirect-uri)
                       kill-process-fn
                       callback))))))
 
-(defun libbasecampel-oauth--open-browser (client-id redirect-uri)
-  "Open the user's favorite web browser so s·he can authorize libbasecampel.
+(defun libbcel-oauth--open-browser (client-id redirect-uri)
+  "Open the user's favorite web browser so s·he can authorize libbcel.
 
 CLIENT-ID is provided by basecamp for each integration.
 
@@ -95,7 +95,7 @@ should be a string such as \"http://localhost:9321\"."
            client-id
            redirect-uri)))
 
-(defun libbasecampel-oauth--http-server-filter (client-id client-secret redirect-uri kill-process-fn callback process data)
+(defun libbcel-oauth--http-server-filter (client-id client-secret redirect-uri kill-process-fn callback process data)
   "Analyze DATA and continue the OAUTH process if DATA has a code.
 
 CLIENT-ID and CLIENT-SECRET are provided by basecamp for each
@@ -118,7 +118,7 @@ client which opened the connection."
       (setf (point) (point-min))
       (when (re-search-forward (rx bol "GET /?code=" (group-n 1 (+ (not (any " ")))) " ") nil t)
         (let ((code (match-string 1)))
-          (libbasecampel-oauth--send-auth-request
+          (libbcel-oauth--send-auth-request
            `((type . "web_server")
              (client_id . ,client-id)
              (redirect_uri . ,redirect-uri)
@@ -134,16 +134,16 @@ client which opened the connection."
              (funcall kill-process-fn))
            kill-process-fn))))))
 
-(defun libbasecampel-oauth--refresh-access-token (store callback)
+(defun libbcel-oauth--refresh-access-token (store callback)
   "Execute CALLBACK with a refreshed access token from STORE."
   (let* ((client-id (map-elt store :client-id))
          (client-secret (map-elt store :client-secret))
          (refresh-token (map-elt store :refresh-token)))
-    (libbasecampel-oauth--send-auth-request
+    (libbcel-oauth--send-auth-request
      `((type . "refresh")
        (refresh_token . ,refresh-token)
        (client_id . ,client-id)
-       (redirect_uri . ,(libbasecampel-oauth--redirect-uri))
+       (redirect_uri . ,(libbcel-oauth--redirect-uri))
        (client_secret . ,client-secret))
      (lambda (data)
        (funcall callback data))
@@ -151,7 +151,7 @@ client which opened the connection."
        (user-error "Failed to refresh basecamp access token")
        (funcall callback)))))
 
-(defun libbasecampel-oauth--send-auth-request (params success failure)
+(defun libbcel-oauth--send-auth-request (params success failure)
   "Do a POST request with PARAMS on Basecamp auth URL.
 Execute SUCCESS with data upon success, or FAILURE."
   (request
@@ -165,28 +165,28 @@ Execute SUCCESS with data upon success, or FAILURE."
    :error (cl-function (lambda (&rest _args)
                          (funcall failure)))))
 
-(defun libbasecampel-oauth--redirect-uri ()
-  "Generate a local redirect-uri from `libbasecampel-oauth-local-http-port'.
+(defun libbcel-oauth--redirect-uri ()
+  "Generate a local redirect-uri from `libbcel-oauth-local-http-port'.
 
 REDIRECT-URI is specified when creating a new integration.  It is
 a string such as \"http://localhost:9321\"."
-  (concat "http://localhost:" (number-to-string libbasecampel-oauth-local-http-port)))
+  (concat "http://localhost:" (number-to-string libbcel-oauth-local-http-port)))
 
-(defun libbasecampel-oauth--fetch (store callback)
+(defun libbcel-oauth--fetch (store callback)
   "Get new tokens using credentials in STORE and pass them to CALLBACK."
   (let* ((client-id (map-elt store :client-id))
          (client-secret (map-elt store :client-secret)))
-    (libbasecampel-oauth--make-http-server client-id client-secret callback)
-    (libbasecampel-oauth--open-browser client-id (libbasecampel-oauth--redirect-uri))))
+    (libbcel-oauth--make-http-server client-id client-secret callback)
+    (libbcel-oauth--open-browser client-id (libbcel-oauth--redirect-uri))))
 
 
 ;;; Token storage
 
-(defun libbasecampel-oauth--store-has-access-token-p (store)
+(defun libbcel-oauth--store-has-access-token-p (store)
   "Return non-nil if STORE has an access token."
   (map-contains-key store :access-token))
 
-(cl-defun libbasecampel-oauth--store-save (store &key auth-token client-id client-secret)
+(cl-defun libbcel-oauth--store-save (store &key auth-token client-id client-secret)
   "Save AUTH-TOKEN within STORE."
   (map-put store :expires-in (or (map-elt auth-token 'expires_in)
                                  (map-elt store :expires-in)))
@@ -198,7 +198,7 @@ a string such as \"http://localhost:9321\"."
                                 (map-elt store :client-id)))
   (map-put store :client-secret (or client-secret
                                     (map-elt store :client-secret)))
-  (with-current-buffer (find-file-noselect libbasecampel-oauth-store-filename)
+  (with-current-buffer (find-file-noselect libbcel-oauth-store-filename)
     (erase-buffer)
     (insert (format "%S" store))
     (save-buffer)))
@@ -206,13 +206,13 @@ a string such as \"http://localhost:9321\"."
 
 ;;; Public function
 
-(defun libbasecampel-oauth-get-store (client-id client-secret)
+(defun libbcel-oauth-get-store (client-id client-secret)
   "Return a `store' where Basecamp tokens should be saved.
 
 CLIENT-ID and CLIENT-SECRET are provided by basecamp for each
 integration."
-  (let ((store (if (file-readable-p libbasecampel-oauth-store-filename)
-                   (with-current-buffer (find-file-noselect libbasecampel-oauth-store-filename)
+  (let ((store (if (file-readable-p libbcel-oauth-store-filename)
+                   (with-current-buffer (find-file-noselect libbcel-oauth-store-filename)
                      (setf (point) (point-min))
                      (read (current-buffer)))
                  (make-hash-table :size 10))))
@@ -220,18 +220,18 @@ integration."
     (map-put store :client-secret client-secret)
     store))
 
-(defun libbasecampel-oauth-get-access-token (store callback)
+(defun libbcel-oauth-get-access-token (store callback)
   "Execute CALLBACK with an access-token using the credentials saved in STORE.
-To create STORE, call `libbasecampel-oauth-get-store'."
+To create STORE, call `libbcel-oauth-get-store'."
   (let ((auth-token-callback
          (lambda (auth-token)
            (message "auth-token: %s" auth-token)
-           (libbasecampel-oauth--store-save store :auth-token auth-token)
+           (libbcel-oauth--store-save store :auth-token auth-token)
            (funcall callback (map-elt store :access-token)))))
-    (if (libbasecampel-oauth--store-has-access-token-p store)
-        (libbasecampel-oauth--refresh-access-token store auth-token-callback)
-      (libbasecampel-oauth--fetch store auth-token-callback)))
+    (if (libbcel-oauth--store-has-access-token-p store)
+        (libbcel-oauth--refresh-access-token store auth-token-callback)
+      (libbcel-oauth--fetch store auth-token-callback)))
   t)
 
-(provide 'libbasecampel-oauth)
-;;; libbasecampel-oauth.el ends here
+(provide 'libbcel-oauth)
+;;; libbcel-oauth.el ends here
