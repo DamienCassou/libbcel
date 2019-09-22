@@ -186,18 +186,29 @@ a string such as \"http://localhost:9321\"."
   "Return non-nil if STORE has an access token."
   (map-contains-key store :access-token))
 
+(defun libbcel-oauth--store-needs-refresh-p (store)
+  "Return non-nil if STORE has an outdated access token."
+  (time-less-p
+   (map-elt store :deadline)
+   (current-time)))
+
 (cl-defun libbcel-oauth--store-save (store &key auth-token client-id client-secret)
   "Save AUTH-TOKEN within STORE."
-  (map-put store :expires-in (or (map-elt auth-token 'expires_in)
-                                 (map-elt store :expires-in)))
-  (map-put store :access-token (or (map-elt auth-token 'access_token)
-                                   (map-elt store :access-token)))
-  (map-put store :refresh-token (or (map-elt auth-token 'refresh_token)
-                                    (map-elt store :refresh-token)))
-  (map-put store :client-id (or client-id
-                                (map-elt store :client-id)))
-  (map-put store :client-secret (or client-secret
-                                    (map-elt store :client-secret)))
+  (let* ((access-token (map-elt auth-token 'access_token))
+         (refresh-token (map-elt auth-token 'refresh_token))
+         (expires-in (map-elt auth-token 'expires_in))
+         (deadline (when expires-in
+                     (time-add (current-time) expires-in))))
+    (when access-token
+      (map-put store :access-token access-token))
+    (when refresh-token
+      (map-put store :refresh-token refresh-token))
+    (when deadline
+      (map-put store :deadline deadline))
+    (when client-id
+      (map-put store :client-id client-id))
+    (when client-secret
+      (map-put store :client-secret client-secret)))
   (with-current-buffer (find-file-noselect libbcel-oauth-store-filename)
     (erase-buffer)
     (insert (format "%S" store))
@@ -225,12 +236,13 @@ integration."
 To create STORE, call `libbcel-oauth-get-store'."
   (let ((auth-token-callback
          (lambda (auth-token)
-           (message "auth-token: %s" auth-token)
            (libbcel-oauth--store-save store :auth-token auth-token)
            (funcall callback (map-elt store :access-token)))))
-    (if (libbcel-oauth--store-has-access-token-p store)
-        (libbcel-oauth--refresh-access-token store auth-token-callback)
-      (libbcel-oauth--fetch store auth-token-callback)))
+    (if (not (libbcel-oauth--store-has-access-token-p store))
+        (libbcel-oauth--fetch store auth-token-callback)
+      (if (libbcel-oauth--store-needs-refresh-p store)
+          (libbcel-oauth--refresh-access-token store auth-token-callback)
+        (funcall callback (map-elt store :access-token)))))
   t)
 
 (provide 'libbcel-oauth)
