@@ -48,6 +48,14 @@ If the filename ends with .gpg, the file will be encrypted with
   "GPG keys to use to encrypt the store."
   :type '(repeat string))
 
+(defcustom libbcel-oauth-client-id nil
+  "Set your basecamp client id here."
+  :type 'string)
+
+(defcustom libbcel-oauth-client-secret nil
+  "Set your basecamp client secret here."
+  :type 'string)
+
 (defcustom libbcel-oauth-local-http-port 9321
   "The port number used for the redirect uri.
 
@@ -242,18 +250,15 @@ a string such as \"http://localhost:9321\"."
 
 ;;; Public function
 
-(defun libbcel-oauth-get-store (client-id client-secret)
-  "Return a `store' where Basecamp tokens should be saved.
-
-CLIENT-ID and CLIENT-SECRET are provided by basecamp for each
-integration."
+(defun libbcel-oauth-get-store ()
+  "Return a `store' where Basecamp tokens should be saved."
   (let ((store (if (file-readable-p libbcel-oauth-store-filename)
                    (with-current-buffer (find-file-noselect libbcel-oauth-store-filename)
                      (setf (point) (point-min))
                      (read (current-buffer)))
                  (make-hash-table :size 10))))
-    (map-put store :client-id client-id)
-    (map-put store :client-secret client-secret)
+    (map-put store :client-id libbcel-oauth-client-id)
+    (map-put store :client-secret libbcel-oauth-client-secret)
     store))
 
 (defun libbcel-oauth-get-access-token (store callback)

@@ -38,14 +38,6 @@
   "Configure libbcel to integrate Basecamp."
   :group 'external)
 
-(defcustom libbcel-client-id nil
-  "Set your basecamp client id here."
-  :type 'string)
-
-(defcustom libbcel-client-secret nil
-  "Set your basecamp client secret here."
-  :type 'string)
-
 (defcustom libbcel-account-id nil
   "The account id to connect to.
 This is the first number appearing after basecamp.com in the URL
@@ -123,7 +115,7 @@ when you are on the basecamp website."
 (defun libbcel--oauth-store ()
   "Return the OAuth authentication data."
   (or libbcel--oauth-store
-      (setq libbcel--oauth-store (libbcel-oauth-get-store libbcel-client-id libbcel-client-secret))))
+      (setq libbcel--oauth-store (libbcel-oauth-get-store))))
 
 (defun libbcel--async-mapcar (mapfn list callback)
   "Apply MAPFN to each element of LIST and pass result to CALLBACK.
