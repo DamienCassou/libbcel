@@ -65,7 +65,7 @@ when you are on the basecamp website."
          :read-only t
          :alist-key-name dock
          :alist-transformer (lambda (tools-data)
-                              (libbcel--create-instances-from-data 'libbcel-tool tools-data))))
+                              (libbcel--create-instances-from-data #'libbcel--tool-type tools-data))))
 
 (cl-defstruct (libbcel-tool
                (:include libbcel-entity)
@@ -74,6 +74,16 @@ when you are on the basecamp website."
   (enabled nil
            :read-only t
            :alist-transformer (lambda (data) (not (eq data :json-false)))))
+
+(cl-defstruct (libbcel-message-board
+               (:include libbcel-tool)
+               (:constructor libbcel-message-board-create)
+               (:conc-name libbcel-message-board-)))
+
+(cl-defstruct (libbcel-todoset
+               (:include libbcel-tool)
+               (:constructor libbcel-todoset-create)
+               (:conc-name libbcel-todoset-)))
 
 (cl-defstruct (libbcel-message
                (:include libbcel-entity
@@ -102,6 +112,14 @@ when you are on the basecamp website."
 
 (cl-defmethod libbcel-id ((entity libbcel-entity))
   (libbcel--entity-id entity))
+
+(defun libbcel-tool-message-board-p (tool)
+  "Return non-nil if TOOL is a message board."
+  (string= (libbcel-name tool) "message_board"))
+
+(defun libbcel-tool-todoset-p (tool)
+  "Return non-nil if TOOL is a todoset."
+  (string= (libbcel-name tool) "todoset"))
 
 
 ;;; Private variables
@@ -207,6 +225,33 @@ STRUCT-TYPE is passed unchanged to
    (lambda (access-token)
      (libbcel-client-get-url access-token url callback))))
 
+(defun libbcel--tool-type (tool-data)
+  "Return a struct type based to instanciate TOOL-DATA."
+  (let ((type (intern (map-elt tool-data 'name))))
+    (pcase type
+      ('message_board 'libbcel-message-board)
+      ('todoset 'libbcel-todoset)
+      (_ nil))))
+
+(cl-defgeneric libbcel--tool-child-struct-type (tool)
+  "Return a symbol representing the structure type to instanciate for children of TOOL.")
+
+(cl-defmethod libbcel--tool-child-struct-type ((_tool libbcel-message-board))
+  'libbcel-message)
+
+(cl-defmethod libbcel--tool-child-struct-type ((_tool libbcel-todoset))
+  'libbcel-todo)
+
+(cl-defgeneric libbcel--tool-child-url-key (tool)
+  "Return a symbol representing which field of TOOL contains the url to fetch its children.")
+
+(cl-defmethod libbcel--tool-child-url-key ((_tool libbcel-message-board))
+  'messages_url)
+
+(cl-defmethod libbcel--tool-child-url-key ((_tool libbcel-todoset))
+  'todolists_url)
+
+
 
 ;;; Public functions
 
@@ -229,22 +274,6 @@ STRUCT-TYPE is passed unchanged to
    (seq-filter
     #'libbcel-tool-enabled
     (libbcel-project-tools project))))
-
-(defun libbcel--tool-child-struct-type (tool)
-  "Return a struct-type to instanciate children of TOOL."
-  (let ((type (libbcel-name tool)))
-    (cond
-     ((string= type "message_board") 'libbcel-message)
-     ((string= type "todoset") 'libbcel-todolist)
-     (t (user-error "Libbcel: unknown tool type `%s" type)))))
-
-(defun libbcel--tool-child-url-key (tool)
-  "Return the URL association key to fetch children of TOOL."
-  (let ((type (libbcel-name tool)))
-    (cond
-     ((string= type "message_board") 'messages_url)
-     ((string= type "todoset") 'todolists_url)
-     (t (user-error "Libbcel: unknown tool type `%s" type)))))
 
 (cl-defmethod libbcel-children ((tool libbcel-tool) callback)
   (libbcel-get-url
