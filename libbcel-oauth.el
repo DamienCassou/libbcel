@@ -37,9 +37,16 @@
   "Group for OAuth authentication to Basecamp."
   :group 'libbcel)
 
-(defcustom libbcel-oauth-store-filename (concat user-emacs-directory "libbcel-oauth.store")
-  "Filename where Basecamp 3 OAuth tokens are stored."
+(defcustom libbcel-oauth-store-filename (concat user-emacs-directory "libbcel-oauth.el.gpg")
+  "Filename where Basecamp 3 OAuth tokens are stored.
+
+If the filename ends with .gpg, the file will be encrypted with
+`libbcel-oauth-store-encryption-keys' if non-nil."
   :type 'file)
+
+(defcustom libbcel-oauth-store-encryption-keys nil
+  "GPG keys to use to encrypt the store."
+  :type '(repeat string))
 
 (defcustom libbcel-oauth-local-http-port 9321
   "The port number used for the redirect uri.
@@ -229,6 +236,7 @@ a string such as \"http://localhost:9321\"."
   (with-current-buffer (find-file-noselect libbcel-oauth-store-filename)
     (erase-buffer)
     (insert (format "%S" store))
+    (setq-local epa-file-encrypt-to libbcel-oauth-store-encryption-keys)
     (save-buffer)))
 
 
