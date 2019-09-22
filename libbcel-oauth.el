@@ -125,6 +125,7 @@ client which opened the connection."
              (client_secret . ,client-secret)
              (code . ,code))
            (lambda (data)
+             (libbcel-oauth--http-respond process)
              (funcall callback data)
              ;; stop the connection to the client:
              (stop-process process)
@@ -133,6 +134,22 @@ client which opened the connection."
              ;; accepting new connections:
              (funcall kill-process-fn))
            kill-process-fn))))))
+
+(defun libbcel-oauth--http-respond (process)
+  "Respond to the http client in PROCESS that everything went well."
+  (let ((content "<p>Everything ok, you may go back to Emacs.</p>")
+        (time (current-time-string)))
+
+    (send-string process
+                 (format "HTTP/1.1 200 OK
+Date: %s
+Server: Emacs
+Last-Modified: %s
+Content-Length: %s
+Content-Type: text/html
+Connection: Closed
+
+%s" time time (length content) content))))
 
 (defun libbcel-oauth--refresh-access-token (store callback)
   "Execute CALLBACK with a refreshed access token from STORE."
