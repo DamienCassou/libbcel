@@ -5,7 +5,7 @@
 ;; Author: Damien Cassou <damien@cassou.me>
 ;; Url: https://gitlab.petton.fr/bcel/libbcel
 ;; Package-requires: ((emacs "26.1"))
-;; Version: 0.3.0
+;; Version: 0.4.0
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -37,9 +37,24 @@
   "Group for OAuth authentication to Basecamp."
   :group 'libbcel)
 
-(defcustom libbcel-oauth-store-filename (concat user-emacs-directory "libbcel-oauth.store")
-  "Filename where Basecamp 3 OAuth tokens are stored."
+(defcustom libbcel-oauth-store-filename (concat user-emacs-directory "libbcel-oauth.el.gpg")
+  "Filename where Basecamp 3 OAuth tokens are stored.
+
+If the filename ends with .gpg, the file will be encrypted with
+`libbcel-oauth-store-encryption-keys' if non-nil."
   :type 'file)
+
+(defcustom libbcel-oauth-store-encryption-keys nil
+  "GPG keys to use to encrypt the store."
+  :type '(repeat string))
+
+(defcustom libbcel-oauth-client-id nil
+  "Set your basecamp client id here."
+  :type 'string)
+
+(defcustom libbcel-oauth-client-secret nil
+  "Set your basecamp client secret here."
+  :type 'string)
 
 (defcustom libbcel-oauth-local-http-port 9321
   "The port number used for the redirect uri.
@@ -125,6 +140,7 @@ client which opened the connection."
              (client_secret . ,client-secret)
              (code . ,code))
            (lambda (data)
+             (libbcel-oauth--http-respond process)
              (funcall callback data)
              ;; stop the connection to the client:
              (stop-process process)
@@ -133,6 +149,22 @@ client which opened the connection."
              ;; accepting new connections:
              (funcall kill-process-fn))
            kill-process-fn))))))
+
+(defun libbcel-oauth--http-respond (process)
+  "Respond to the http client in PROCESS that everything went well."
+  (let ((content "<p>Everything ok, you may go back to Emacs.</p>")
+        (time (current-time-string)))
+
+    (send-string process
+                 (format "HTTP/1.1 200 OK
+Date: %s
+Server: Emacs
+Last-Modified: %s
+Content-Length: %s
+Content-Type: text/html
+Connection: Closed
+
+%s" time time (length content) content))))
 
 (defun libbcel-oauth--refresh-access-token (store callback)
   "Execute CALLBACK with a refreshed access token from STORE."
@@ -186,38 +218,47 @@ a string such as \"http://localhost:9321\"."
   "Return non-nil if STORE has an access token."
   (map-contains-key store :access-token))
 
+(defun libbcel-oauth--store-needs-refresh-p (store)
+  "Return non-nil if STORE has an outdated access token."
+  (time-less-p
+   (map-elt store :deadline)
+   (current-time)))
+
 (cl-defun libbcel-oauth--store-save (store &key auth-token client-id client-secret)
   "Save AUTH-TOKEN within STORE."
-  (map-put store :expires-in (or (map-elt auth-token 'expires_in)
-                                 (map-elt store :expires-in)))
-  (map-put store :access-token (or (map-elt auth-token 'access_token)
-                                   (map-elt store :access-token)))
-  (map-put store :refresh-token (or (map-elt auth-token 'refresh_token)
-                                    (map-elt store :refresh-token)))
-  (map-put store :client-id (or client-id
-                                (map-elt store :client-id)))
-  (map-put store :client-secret (or client-secret
-                                    (map-elt store :client-secret)))
+  (let* ((access-token (map-elt auth-token 'access_token))
+         (refresh-token (map-elt auth-token 'refresh_token))
+         (expires-in (map-elt auth-token 'expires_in))
+         (deadline (when expires-in
+                     (time-add (current-time) expires-in))))
+    (when access-token
+      (map-put store :access-token access-token))
+    (when refresh-token
+      (map-put store :refresh-token refresh-token))
+    (when deadline
+      (map-put store :deadline deadline))
+    (when client-id
+      (map-put store :client-id client-id))
+    (when client-secret
+      (map-put store :client-secret client-secret)))
   (with-current-buffer (find-file-noselect libbcel-oauth-store-filename)
     (erase-buffer)
     (insert (format "%S" store))
+    (setq-local epa-file-encrypt-to libbcel-oauth-store-encryption-keys)
     (save-buffer)))
 
 
 ;;; Public function
 
-(defun libbcel-oauth-get-store (client-id client-secret)
-  "Return a `store' where Basecamp tokens should be saved.
-
-CLIENT-ID and CLIENT-SECRET are provided by basecamp for each
-integration."
+(defun libbcel-oauth-get-store ()
+  "Return a `store' where Basecamp tokens should be saved."
   (let ((store (if (file-readable-p libbcel-oauth-store-filename)
                    (with-current-buffer (find-file-noselect libbcel-oauth-store-filename)
                      (setf (point) (point-min))
                      (read (current-buffer)))
                  (make-hash-table :size 10))))
-    (map-put store :client-id client-id)
-    (map-put store :client-secret client-secret)
+    (map-put store :client-id libbcel-oauth-client-id)
+    (map-put store :client-secret libbcel-oauth-client-secret)
     store))
 
 (defun libbcel-oauth-get-access-token (store callback)
@@ -225,12 +266,13 @@ integration."
 To create STORE, call `libbcel-oauth-get-store'."
   (let ((auth-token-callback
          (lambda (auth-token)
-           (message "auth-token: %s" auth-token)
            (libbcel-oauth--store-save store :auth-token auth-token)
            (funcall callback (map-elt store :access-token)))))
-    (if (libbcel-oauth--store-has-access-token-p store)
-        (libbcel-oauth--refresh-access-token store auth-token-callback)
-      (libbcel-oauth--fetch store auth-token-callback)))
+    (if (not (libbcel-oauth--store-has-access-token-p store))
+        (libbcel-oauth--fetch store auth-token-callback)
+      (if (libbcel-oauth--store-needs-refresh-p store)
+          (libbcel-oauth--refresh-access-token store auth-token-callback)
+        (funcall callback (map-elt store :access-token)))))
   t)
 
 (provide 'libbcel-oauth)

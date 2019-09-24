@@ -5,7 +5,7 @@
 ;; Author: Damien Cassou <damien@cassou.me>
 ;; Url: https://gitlab.petton.fr/bcel/libbcel
 ;; Package-requires: ((emacs "26.1"))
-;; Version: 0.3.0
+;; Version: 0.4.0
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -30,7 +30,24 @@
 (require 'request)
 (require 'json)
 
-(defun libbcel-client-get-url (access-token url &optional callback)
+(require 'libbcel-oauth)
+
+(defcustom libbcel-client-account-id nil
+  "The account id to connect to.
+This is the first number appearing after basecamp.com in the URL
+when you are on the basecamp website."
+  :type 'string
+  :group 'libbcel)
+
+(defvar libbcel-client--oauth-store nil
+  "Remembers the OAuth authentication data.")
+
+(defun libbcel-client--oauth-store ()
+  "Return the OAuth authentication data."
+  (or libbcel-client--oauth-store
+      (setq libbcel-client--oauth-store (libbcel-oauth-get-store))))
+
+(defun libbcel-client--get-url-from-token (access-token url &optional callback)
   "Do a GET query to Basecamp 3 API at URL.
 
 ACCESS-TOKEN is found in the result of the OAUTH2 authentication.
@@ -46,19 +63,33 @@ When CALLBACK is non-nil, evaluate it with the response."
    :success (cl-function (lambda (&key data &allow-other-keys)
                            (funcall callback data)))))
 
-(defun libbcel-client-get-path (access-token account-id path &optional callback)
+(defun libbcel-client--get-path-from-token (access-token account-id path &optional callback)
   "Execute CALLBACK with the result of the GET call to PATH.
 
 ACCESS-TOKEN can be retrieved with `libbcel-oauth-get-access-token'.
 
 ACCOUNT-ID is the first number appearing after basecamp.com in
 the URL when you are on the basecamp website."
-  (libbcel-client-get-url
+  (libbcel-client--get-url-from-token
    access-token
    (format "https://3.basecampapi.com/%s/%s"
            account-id
            path)
    callback))
+
+(defun libbcel-client-get-path (path &optional callback)
+  "Execute CALLBACK with the result of a GET call to PATH."
+  (libbcel-oauth-get-access-token
+   (libbcel-client--oauth-store)
+   (lambda (access-token)
+     (libbcel-client--get-path-from-token access-token libbcel-client-account-id path callback))))
+
+(defun libbcel-client-get-url (url callback)
+  "Do a GET request on URL and evaluate CALLBACK with the result."
+  (libbcel-oauth-get-access-token
+   (libbcel-client--oauth-store)
+   (lambda (access-token)
+     (libbcel-client--get-url-from-token access-token url callback))))
 
 (provide 'libbcel-client)
 ;;; libbcel-client.el ends here
