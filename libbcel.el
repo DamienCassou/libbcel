@@ -90,7 +90,8 @@ when you are on the basecamp website."
                          (name nil :alist-key-name subject))
                (:constructor libbcel-message-create)
                (:conc-name libbcel-message-))
-  (content nil :read-only t))
+  (content nil :read-only t)
+  (comments-count 0 :read-only t :alist-key-name comments_count))
 
 (cl-defstruct (libbcel-todolist
                (:include libbcel-entity)
