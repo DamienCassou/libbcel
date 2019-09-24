@@ -159,26 +159,39 @@ computing for the all elements of LIST."
    (lambda (_result) (funcall callback))))
 
 (defun libbcel--create-instance-from-data (struct-type entity-data)
-  "Return an instance of a STRUCT-TYPE from ENTITY-DATA, an alist."
-  (apply
-   #'record
-   struct-type
-   (mapcar
-    (lambda (slot-info)
-      (let* ((alist-key (or (plist-get slot-info :alist-key-name)
-                            (car slot-info)))
-             (alist-value (if (eq alist-key 'alist)
-                              entity-data
-                            (map-elt entity-data alist-key)))
-             (transformer (or (plist-get slot-info :alist-transformer)
-                              #'identity)))
-        (funcall transformer alist-value)))
-    (cdr (cl-struct-slot-info struct-type)))))
+  "Return an instance of a STRUCT-TYPE from ENTITY-DATA, an alist.
+
+If STRUCT-TYPE is a function, pass it the current entity-data.
+The return value must be a symbol representing the structure type
+to instantiate."
+  (let ((struct-type (if (functionp struct-type)
+                         (funcall struct-type entity-data)
+                       struct-type)))
+    (when struct-type
+      (apply
+       #'record
+       struct-type
+       (mapcar
+        (lambda (slot-info)
+          (let* ((alist-key (or (plist-get slot-info :alist-key-name)
+                                (car slot-info)))
+                 (alist-value (if (eq alist-key 'alist)
+                                  entity-data
+                                (map-elt entity-data alist-key)))
+                 (transformer (or (plist-get slot-info :alist-transformer)
+                                  #'identity)))
+            (funcall transformer alist-value)))
+        (cdr (cl-struct-slot-info struct-type)))))))
 
 (defun libbcel--create-instances-from-data (struct-type entities-data)
-  "Return a list of instances of a STRUCT-TYPE from ENTITIES-DATA, a list of alists."
-  (mapcar (lambda (entity-data) (libbcel--create-instance-from-data struct-type entity-data))
-          entities-data))
+  "Return a list of instances of a STRUCT-TYPE from ENTITIES-DATA.
+ENTITIES-DATA is a list of alists.
+
+STRUCT-TYPE is passed unchanged to
+`libbcel--create-instance-from-data'."
+  (seq-remove #'null
+              (mapcar (lambda (entity-data) (libbcel--create-instance-from-data struct-type entity-data))
+                      entities-data)))
 
 (defun libbcel-get-path (path &optional callback)
   "Execute CALLBACK with the result of a GET call to PATH."
