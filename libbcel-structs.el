@@ -35,7 +35,8 @@
   (name nil :read-only t)
   (url nil :read-only t)
   (type nil :read-only t)
-  (alist nil :read-only t))
+  (alist nil :read-only t)
+  (comments-count 0 :read-only t :alist-key-name comments_count))
 
 (cl-defstruct (libbcel-project
                (:include libbcel-entity)
@@ -71,8 +72,7 @@
                          (name nil :alist-key-name subject))
                (:constructor libbcel-message-create)
                (:conc-name libbcel-message-))
-  (content nil :read-only t)
-  (comments-count 0 :read-only t :alist-key-name comments_count))
+  (content nil :read-only t))
 
 (cl-defstruct (libbcel-todolist
                (:include libbcel-entity)
