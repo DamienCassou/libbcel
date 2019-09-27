@@ -35,7 +35,8 @@
   (name nil :read-only t)
   (url nil :read-only t)
   (alist nil :read-only t)
-  (comments-count 0 :read-only t :alist-key-name comments_count))
+  (comments-count 0 :read-only t :alist-key-name comments_count)
+  (parent nil :read-only t))
 
 (cl-defstruct (libbcel-project
                (:include libbcel-entity)
@@ -95,9 +96,12 @@
 (cl-defmethod libbcel-equal ((entity1 libbcel-entity) (entity2 libbcel-entity))
   (equal (libbcel-entity-id entity1) (libbcel-entity-id entity2)))
 
-(defun libbcel-structs-create-instance-from-data (entity-data)
+(defun libbcel-structs-create-instance-from-data (entity-data &optional parent)
   "Return a structure from ENTITY-DATA.
 ENTITY-DATA is an alists.
+
+If PARENT is provided, set the created entity's parent to
+PARENT.  This can later be retrieved with `libbcel-entity-parent'.
 
 The structure to instanciate is decided `libbcel-structs--infer-struct-type'."
   (let ((struct-type (libbcel-structs--infer-struct-type entity-data)))
@@ -109,21 +113,25 @@ The structure to instanciate is decided `libbcel-structs--infer-struct-type'."
         (lambda (slot-info)
           (let* ((alist-key (or (plist-get slot-info :alist-key-name)
                                 (car slot-info)))
-                 (alist-value (if (eq alist-key 'alist)
-                                  entity-data
-                                (map-elt entity-data alist-key)))
+                 (alist-value (pcase alist-key
+                                ('alist entity-data)
+                                ('parent parent)
+                                (_ (map-elt entity-data alist-key))))
                  (transformer (or (plist-get slot-info :alist-transformer)
                                   #'identity)))
             (funcall transformer alist-value)))
         (cdr (cl-struct-slot-info struct-type)))))))
 
-(defun libbcel-structs-create-instances-from-data (entities-data)
+(defun libbcel-structs-create-instances-from-data (entities-data &optional parent)
   "Return a list of structures from ENTITIES-DATA.
 ENTITIES-DATA is a list of alists.
 
+If PARENT is provided, set the created entity's parent to
+PARENT.  This can later be retrieved with `libbcel-entity-parent'.
+
 The structures to instanciate are decided by `libbcel-structs--infer-struct-type'."
   (seq-remove #'null
-              (mapcar #'libbcel-structs-create-instance-from-data
+              (mapcar (lambda (data) (libbcel-structs-create-instance-from-data data parent))
                       entities-data)))
 
 (defun libbcel-structs--infer-struct-type (entity-data)

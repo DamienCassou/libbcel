@@ -36,13 +36,13 @@
 (cl-defgeneric libbcel-nav-children (entity callback)
   "Execute CALLBACK with the children of ENTITY as parameter.")
 
-(cl-defmethod libbcel-nav-children ((_entity (eql projects)) callback)
+(cl-defmethod libbcel-nav-children ((entity (eql projects)) callback)
   "Execute CALLBACK with the list of all projects as parameter."
   (libbcel-client-get-path
    "/projects.json"
    (lambda (projects-data)
      (funcall callback
-              (libbcel-structs-create-instances-from-data projects-data)))))
+              (libbcel-structs-create-instances-from-data projects-data entity)))))
 
 (cl-defmethod libbcel-nav-children ((project libbcel-project) callback)
   (let* ((enabled-tool-alists (seq-filter
@@ -55,14 +55,14 @@
     (libbcel-util-async-mapcar
      #'libbcel-client-get-url
      tool-urls
-     (lambda (tools-data) (funcall callback (libbcel-structs-create-instances-from-data tools-data))))))
+     (lambda (tools-data) (funcall callback (libbcel-structs-create-instances-from-data tools-data project))))))
 
 (cl-defmethod libbcel-nav-children ((tool libbcel-tool) callback)
   (libbcel-client-get-url
    (libbcel-tool-children-url tool)
    (lambda (children-data)
      (funcall callback
-              (libbcel-structs-create-instances-from-data children-data)))))
+              (libbcel-structs-create-instances-from-data children-data tool)))))
 
 (cl-defmethod libbcel-nav-children ((todolist libbcel-todolist) callback)
   (libbcel-util-async-mapcar
@@ -70,7 +70,7 @@
      (libbcel-client-get-url
       (libbcel-todolist-todos-url todolist)
       (lambda (todos-data)
-        (funcall partial-callback (libbcel-structs-create-instances-from-data todos-data)))
+        (funcall partial-callback (libbcel-structs-create-instances-from-data todos-data todolist)))
       params))
    (list nil '((completed . "true")))
    (lambda (todos)
