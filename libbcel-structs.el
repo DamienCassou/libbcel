@@ -49,20 +49,24 @@
                               (libbcel-structs-create-instances-from-data #'libbcel-structs--tool-type tools-data))))
 
 (cl-defstruct (libbcel-tool
-               (:include libbcel-entity)
+               (:include libbcel-entity
+                         (name nil :alist-key-name title))
                (:constructor libbcel-tool-create)
                (:conc-name libbcel-tool-))
   (enabled nil
            :read-only t
-           :alist-transformer (lambda (data) (not (eq data :json-false)))))
+           :alist-transformer (lambda (data) (not (eq data :json-false))))
+  (children-url nil :read-only t))
 
 (cl-defstruct (libbcel-message-board
-               (:include libbcel-tool)
+               (:include libbcel-tool
+                         (children-url nil :alist-key-name messages_url))
                (:constructor libbcel-message-board-create)
                (:conc-name libbcel-message-board-)))
 
 (cl-defstruct (libbcel-todoset
-               (:include libbcel-tool)
+               (:include libbcel-tool
+                         (children-url nil :alist-key-name todolists_url))
                (:constructor libbcel-todoset-create)
                (:conc-name libbcel-todoset-)))
 
