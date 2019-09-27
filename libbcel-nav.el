@@ -31,6 +31,7 @@
 
 (require 'libbcel-structs)
 (require 'libbcel-client)
+(require 'libbcel-util)
 
 (cl-defgeneric libbcel-nav-children (entity callback)
   "Execute CALLBACK with the children of ENTITY as parameter.")
@@ -65,10 +66,16 @@
                   children-data)))))))
 
 (cl-defmethod libbcel-nav-children ((todolist libbcel-todolist) callback)
-  (libbcel-client-get-url
-   (libbcel-todolist-todos-url todolist)
-   (lambda (todos-data)
-     (funcall callback (libbcel-structs-create-instances-from-data 'libbcel-todo todos-data)))))
+  (libbcel-util-async-mapcar
+   (lambda (params partial-callback)
+     (libbcel-client-get-url
+      (libbcel-todolist-todos-url todolist)
+      (lambda (todos-data)
+        (funcall partial-callback (libbcel-structs-create-instances-from-data 'libbcel-todo todos-data)))
+      params))
+   (list nil '((completed . "true")))
+   (lambda (todos)
+     (funcall callback (apply #'seq-concatenate 'list todos)))))
 
 
 ;;; Private functions
