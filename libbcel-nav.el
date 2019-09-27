@@ -43,7 +43,7 @@
    (lambda (projects-data)
      (funcall callback
               (libbcel-structs-create-instances-from-data
-               'libbcel-project
+               nil
                projects-data)))))
 
 (cl-defmethod libbcel-nav-children ((project libbcel-project) callback)
@@ -74,7 +74,7 @@
      (libbcel-client-get-url
       (libbcel-todolist-todos-url todolist)
       (lambda (todos-data)
-        (funcall partial-callback (libbcel-structs-create-instances-from-data 'libbcel-todo todos-data)))
+        (funcall partial-callback (libbcel-structs-create-instances-from-data nil todos-data)))
       params))
    (list nil '((completed . "true")))
    (lambda (todos)

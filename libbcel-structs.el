@@ -136,13 +136,17 @@ STRUCT-TYPE is passed unchanged to
 (defun libbcel-structs--infer-struct-type (entity-data)
   "Return a symbol of a structure type to instanciate for ENTITY-DATA."
   (let ((type-name (map-elt entity-data 'type)))
-    (pcase type-name
-      ("Message::Board" 'libbcel-message-board)
-      ("Todoset" 'libbcel-todoset)
-      ("Project" 'libbcel-project)
-      ("Todolist" 'libbcel-todolist)
-      (_ (message "libbcel-structs: I don't know what the type is for `%s'" type-name)
-         nil))))
+    (if type-name
+        (pcase type-name
+          ("Message::Board" 'libbcel-message-board)
+          ("Todoset" 'libbcel-todoset)
+          ("Project" 'libbcel-project)
+          ("Todolist" 'libbcel-todolist)
+          ("Todo" 'libbcel-todo)
+          (_ (message "libbcel-structs: I don't know what the type is for `%s'" type-name)
+             nil))
+      (when (map-contains-key entity-data 'dock)
+        'libbcel-project))))
 
 (provide 'libbcel-structs)
 ;;; libbcel-structs.el ends here
