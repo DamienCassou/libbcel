@@ -49,8 +49,8 @@
   "PROMPT user to select one entity among ENTITIES.
 
 Transform each entity to a string with TRANSFORMER,
-`libbcel-name' if nil."
-  (let* ((transformer (or transformer #'libbcel-name))
+`libbcel-entity-name' if nil."
+  (let* ((transformer (or transformer #'libbcel-entity-name))
          (map (make-hash-table :test 'equal :size (length entities)))
          (entity-strings (mapcar (lambda (entity) (funcall transformer entity)) entities)))
     (cl-mapcar (lambda (entity entity-string)

@@ -55,7 +55,7 @@
 
 (cl-defmethod libbcel-nav-children ((tool libbcel-tool) callback)
   (libbcel-client-get-url
-   (libbcel-structs-url tool)
+   (libbcel-entity-url tool)
    (lambda (tool-data)
      (libbcel-client-get-url
       (map-elt tool-data (libbcel-nav--tool-child-url-key tool))

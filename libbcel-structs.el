@@ -30,7 +30,7 @@
 
 (cl-defstruct (libbcel-entity
                (:constructor libbcel--entity-create)
-               (:conc-name libbcel--entity-))
+               (:conc-name libbcel-entity-))
   (id nil :read-only t)
   (name nil :read-only t)
   (url nil :read-only t)
@@ -94,19 +94,7 @@
   (completion-url nil :read-only t :alist-key-name completion_url))
 
 (cl-defmethod libbcel-equal ((entity1 libbcel-entity) (entity2 libbcel-entity))
-  (equal (libbcel--entity-id entity1) (libbcel--entity-id entity2)))
-
-(cl-defmethod libbcel-name ((entity libbcel-entity))
-  (libbcel--entity-name entity))
-
-(cl-defmethod libbcel-id ((entity libbcel-entity))
-  (libbcel--entity-id entity))
-
-(cl-defmethod libbcel-structs-url ((entity libbcel-entity))
-  (libbcel--entity-url entity))
-
-(cl-defmethod libbcel-comments-count ((entity libbcel-entity))
-  (libbcel--entity-comments-count entity))
+  (equal (libbcel-entity-id entity1) (libbcel-entity-id entity2)))
 
 (defun libbcel-structs-create-instance-from-data (struct-type entity-data)
   "Return an instance of a STRUCT-TYPE from ENTITY-DATA, an alist.
