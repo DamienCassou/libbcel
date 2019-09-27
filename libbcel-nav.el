@@ -47,23 +47,26 @@
                projects-data)))))
 
 (cl-defmethod libbcel-nav-children ((project libbcel-project) callback)
-  (funcall
-   callback
-   (seq-filter
-    #'libbcel-tool-enabled
-    (libbcel-project-tools project))))
+  (let* ((enabled-tool-alists (seq-filter
+                               (lambda (tool-alist)
+                                 (not (eq (map-elt tool-alist 'enabled) :json-false)))
+                               (libbcel-project-tools project)))
+         (tool-urls (seq-map
+                     (lambda (tool-alist) (map-elt tool-alist 'url))
+                     enabled-tool-alists)))
+    (libbcel-util-async-mapcar
+     #'libbcel-client-get-url
+     tool-urls
+     (lambda (tools-data) (funcall callback (libbcel-structs-create-instances-from-data nil tools-data))))))
 
 (cl-defmethod libbcel-nav-children ((tool libbcel-tool) callback)
   (libbcel-client-get-url
-   (libbcel-entity-url tool)
-   (lambda (tool-data)
-     (libbcel-client-get-url
-      (map-elt tool-data (libbcel-nav--tool-child-url-key tool))
-      (lambda (children-data)
-        (funcall callback
-                 (libbcel-structs-create-instances-from-data
-                  (libbcel-nav--tool-child-struct-type tool)
-                  children-data)))))))
+   (libbcel-tool-children-url tool)
+   (lambda (children-data)
+     (funcall callback
+              (libbcel-structs-create-instances-from-data
+               nil
+               children-data)))))
 
 (cl-defmethod libbcel-nav-children ((todolist libbcel-todolist) callback)
   (libbcel-util-async-mapcar
@@ -76,27 +79,6 @@
    (list nil '((completed . "true")))
    (lambda (todos)
      (funcall callback (apply #'seq-concatenate 'list todos)))))
-
-
-;;; Private functions
-
-(cl-defgeneric libbcel-nav--tool-child-struct-type (tool)
-  "Return a symbol representing the structure type to instanciate for children of TOOL.")
-
-(cl-defmethod libbcel-nav--tool-child-struct-type ((_tool libbcel-message-board))
-  'libbcel-message)
-
-(cl-defmethod libbcel-nav--tool-child-struct-type ((_tool libbcel-todoset))
-  'libbcel-todolist)
-
-(cl-defgeneric libbcel-nav--tool-child-url-key (tool)
-  "Return a symbol representing which field of TOOL contains the url to fetch its children.")
-
-(cl-defmethod libbcel-nav--tool-child-url-key ((_tool libbcel-message-board))
-  'messages_url)
-
-(cl-defmethod libbcel-nav--tool-child-url-key ((_tool libbcel-todoset))
-  'todolists_url)
 
 (provide 'libbcel-nav)
 ;;; libbcel-nav.el ends here

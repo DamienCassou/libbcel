@@ -42,11 +42,7 @@
                (:constructor libbcel-project-create)
                (:conc-name libbcel-project-))
   (description nil :read-only t)
-  (tools nil
-         :read-only t
-         :alist-key-name dock
-         :alist-transformer (lambda (tools-data)
-                              (libbcel-structs-create-instances-from-data #'libbcel-structs--tool-type tools-data))))
+  (tools nil :read-only t :alist-key-name dock))
 
 (cl-defstruct (libbcel-tool
                (:include libbcel-entity
@@ -137,13 +133,6 @@ STRUCT-TYPE is passed unchanged to
                         (libbcel-structs-create-instance-from-data struct-type entity-data))
                       entities-data)))
 
-(defun libbcel-structs--tool-type (tool-data)
-  "Return a struct type to instanciate TOOL-DATA."
-  (let ((type (intern (map-elt tool-data 'name))))
-    (pcase type
-      ('message_board 'libbcel-message-board)
-      ('todoset 'libbcel-todoset)
-      (_ nil))))
 (defun libbcel-structs--infer-struct-type (entity-data)
   "Return a symbol of a structure type to instanciate for ENTITY-DATA."
   (let ((type-name (map-elt entity-data 'type)))
