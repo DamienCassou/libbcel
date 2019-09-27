@@ -47,8 +47,9 @@ when you are on the basecamp website."
   (or libbcel-client--oauth-store
       (setq libbcel-client--oauth-store (libbcel-oauth-get-store))))
 
-(defun libbcel-client--get-url-from-token (access-token url &optional callback)
+(defun libbcel-client--get-url-from-token (access-token url &optional callback params)
   "Do a GET query to Basecamp 3 API at URL.
+If PARAMS is non-nil it should be an alist that is passed to the GET request.
 
 ACCESS-TOKEN is found in the result of the OAUTH2 authentication.
 See `libbcel-oauth-get-access-token'.
@@ -57,6 +58,7 @@ When CALLBACK is non-nil, evaluate it with the response."
   (request
    url
    :type "GET"
+   :params params
    :headers `(("User-Agent" . "bcel (damien@cassou.me)")
               ("Authorization" . ,(format "Bearer %s" access-token)))
    :parser #'json-read
@@ -84,12 +86,13 @@ the URL when you are on the basecamp website."
    (lambda (access-token)
      (libbcel-client--get-path-from-token access-token libbcel-client-account-id path callback))))
 
-(defun libbcel-client-get-url (url callback)
-  "Do a GET request on URL and evaluate CALLBACK with the result."
+(defun libbcel-client-get-url (url &optional callback params)
+  "Do a GET request on URL and evaluate CALLBACK with the result.
+If PARAMS is non-nil it should be an alist that is passed to the GET request."
   (libbcel-oauth-get-access-token
    (libbcel-client--oauth-store)
    (lambda (access-token)
-     (libbcel-client--get-url-from-token access-token url callback))))
+     (libbcel-client--get-url-from-token access-token url callback params))))
 
 (provide 'libbcel-client)
 ;;; libbcel-client.el ends here
