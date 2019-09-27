@@ -87,7 +87,10 @@
                          (name nil :alist-key-name title))
                (:constructor libbcel-todo-create)
                (:conc-name libbcel-todo-))
-  (description nil :read-only t))
+  (description nil :read-only t)
+  (completed nil
+             :read-only t
+             :alist-transformer (lambda (data) (not (eq data :json-false)))))
 
 (cl-defmethod libbcel-name ((entity libbcel-entity))
   (libbcel--entity-name entity))
