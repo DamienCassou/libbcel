@@ -92,6 +92,9 @@
              :read-only t
              :alist-transformer (lambda (data) (not (eq data :json-false)))))
 
+(cl-defmethod libbcel-equal ((entity1 libbcel-entity) (entity2 libbcel-entity))
+  (equal (libbcel--entity-id entity1) (libbcel--entity-id entity2)))
+
 (cl-defmethod libbcel-name ((entity libbcel-entity))
   (libbcel--entity-name entity))
 
