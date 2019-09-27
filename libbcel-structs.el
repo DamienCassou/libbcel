@@ -34,7 +34,6 @@
   (id nil :read-only t)
   (name nil :read-only t)
   (url nil :read-only t)
-  (type nil :read-only t)
   (alist nil :read-only t)
   (comments-count 0 :read-only t :alist-key-name comments_count))
 
