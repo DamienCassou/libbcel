@@ -63,7 +63,8 @@ When CALLBACK is non-nil, evaluate it with the response."
               ("Authorization" . ,(format "Bearer %s" access-token)))
    :parser #'json-read
    :success (cl-function (lambda (&key data &allow-other-keys)
-                           (funcall callback data)))))
+                           (when callback
+                             (funcall callback data))))))
 
 (defun libbcel-client--get-path-from-token (access-token account-id path &optional callback)
   "Execute CALLBACK with the result of the GET call to PATH.
