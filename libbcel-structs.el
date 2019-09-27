@@ -90,7 +90,8 @@
   (description nil :read-only t)
   (completed nil
              :read-only t
-             :alist-transformer (lambda (data) (not (eq data :json-false)))))
+             :alist-transformer (lambda (data) (not (eq data :json-false))))
+  (completion-url nil :read-only t :alist-key-name completion_url))
 
 (cl-defmethod libbcel-equal ((entity1 libbcel-entity) (entity2 libbcel-entity))
   (equal (libbcel--entity-id entity1) (libbcel--entity-id entity2)))
