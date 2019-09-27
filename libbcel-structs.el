@@ -95,17 +95,12 @@
 (cl-defmethod libbcel-equal ((entity1 libbcel-entity) (entity2 libbcel-entity))
   (equal (libbcel-entity-id entity1) (libbcel-entity-id entity2)))
 
-(defun libbcel-structs-create-instance-from-data (struct-type entity-data)
-  "Return an instance of a STRUCT-TYPE from ENTITY-DATA, an alist.
+(defun libbcel-structs-create-instance-from-data (entity-data)
+  "Return a structure from ENTITY-DATA.
+ENTITY-DATA is an alists.
 
-If STRUCT-TYPE is a function, pass it the current entity-data.
-The return value must be a symbol representing the structure type
-to instantiate.  If STRUCT-TYPE is nil, the structure type to
-create is inferred from ENTITY-DATA.  Otherwise struct-type must
-be a symbol representing a structure type."
-  (let ((struct-type (if (functionp struct-type)
-                         (funcall struct-type entity-data)
-                       (or struct-type (libbcel-structs--infer-struct-type entity-data)))))
+The structure to instanciate is decided `libbcel-structs--infer-struct-type'."
+  (let ((struct-type (libbcel-structs--infer-struct-type entity-data)))
     (when struct-type
       (apply
        #'record
@@ -122,15 +117,13 @@ be a symbol representing a structure type."
             (funcall transformer alist-value)))
         (cdr (cl-struct-slot-info struct-type)))))))
 
-(defun libbcel-structs-create-instances-from-data (struct-type entities-data)
-  "Return a list of instances of a STRUCT-TYPE from ENTITIES-DATA.
+(defun libbcel-structs-create-instances-from-data (entities-data)
+  "Return a list of structures from ENTITIES-DATA.
 ENTITIES-DATA is a list of alists.
 
-STRUCT-TYPE is passed unchanged to
-`libbcel--create-instance-from-data'."
+The structures to instanciate are decided by `libbcel-structs--infer-struct-type'."
   (seq-remove #'null
-              (mapcar (lambda (entity-data)
-                        (libbcel-structs-create-instance-from-data struct-type entity-data))
+              (mapcar #'libbcel-structs-create-instance-from-data
                       entities-data)))
 
 (defun libbcel-structs--infer-struct-type (entity-data)

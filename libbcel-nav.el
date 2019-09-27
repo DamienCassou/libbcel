@@ -42,9 +42,7 @@
    "/projects.json"
    (lambda (projects-data)
      (funcall callback
-              (libbcel-structs-create-instances-from-data
-               nil
-               projects-data)))))
+              (libbcel-structs-create-instances-from-data projects-data)))))
 
 (cl-defmethod libbcel-nav-children ((project libbcel-project) callback)
   (let* ((enabled-tool-alists (seq-filter
@@ -57,16 +55,14 @@
     (libbcel-util-async-mapcar
      #'libbcel-client-get-url
      tool-urls
-     (lambda (tools-data) (funcall callback (libbcel-structs-create-instances-from-data nil tools-data))))))
+     (lambda (tools-data) (funcall callback (libbcel-structs-create-instances-from-data tools-data))))))
 
 (cl-defmethod libbcel-nav-children ((tool libbcel-tool) callback)
   (libbcel-client-get-url
    (libbcel-tool-children-url tool)
    (lambda (children-data)
      (funcall callback
-              (libbcel-structs-create-instances-from-data
-               nil
-               children-data)))))
+              (libbcel-structs-create-instances-from-data children-data)))))
 
 (cl-defmethod libbcel-nav-children ((todolist libbcel-todolist) callback)
   (libbcel-util-async-mapcar
@@ -74,7 +70,7 @@
      (libbcel-client-get-url
       (libbcel-todolist-todos-url todolist)
       (lambda (todos-data)
-        (funcall partial-callback (libbcel-structs-create-instances-from-data nil todos-data)))
+        (funcall partial-callback (libbcel-structs-create-instances-from-data todos-data)))
       params))
    (list nil '((completed . "true")))
    (lambda (todos)
