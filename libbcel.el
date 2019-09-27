@@ -31,6 +31,7 @@
 (require 'libbcel-oauth)
 (require 'libbcel-client)
 (require 'libbcel-structs)
+(require 'libbcel-nav)
 
 
 ;; Configuration
