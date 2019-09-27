@@ -28,6 +28,7 @@
 
 ;;; Code:
 
+(require 'libbcel-util)
 (require 'libbcel-oauth)
 (require 'libbcel-client)
 (require 'libbcel-structs)
@@ -39,56 +40,6 @@
 (defgroup libbcel nil
   "Configure libbcel to integrate Basecamp."
   :group 'external)
-
-
-;;; Private variables
-
-
-
-;;; Private functions
-
-
-
-(defun libbcel--async-mapcar (mapfn list callback)
-  "Apply MAPFN to each element of LIST and pass result to CALLBACK.
-
-MAPFN is a function taking 2 arguments: the element to map and a
-callback to call when the mapping is done."
-  (if (not list)
-      (funcall callback nil)
-    (let ((result (make-vector (length list) nil))
-          (count 0))
-      (cl-loop for index below (length list)
-               for item in list
-               do (let ((index index) (item item))
-                    (funcall
-                     mapfn
-                     item
-                     (lambda (item-result)
-                       (setf (seq-elt result index) item-result)
-                       (cl-incf count)
-                       (when (eq count (length list))
-                         ;; use `run-at-time' to ensure that CALLBACK is
-                         ;; consistently called asynchronously even if MAPFN is
-                         ;; synchronous:
-                         (run-at-time
-                          0 nil
-                          callback
-                          (seq-concatenate 'list result))))))))))
-
-(defun libbcel--async-mapc (mapfn list callback)
-  "Same as `navigel-async-mapcar' but for side-effects only.
-
-MAPFN is a function taking 2 arguments: an element of LIST and a
-callback.  MAPFN should call the callback with no argument when
-done computing.
-
-CALLBACK is a function of no argument that is called when done
-computing for the all elements of LIST."
-  (libbcel--async-mapcar
-   (lambda (item callback) (funcall mapfn item (lambda () (funcall callback nil))))
-   list
-   (lambda (_result) (funcall callback))))
 
 
 ;;; Public functions
@@ -119,7 +70,7 @@ Pass PROMPT, the elements of ENTITY and TRANSFORMER to
               (libbcel-completing-read prompt entities transformer)))))
 
 (cl-defmethod libbcel-nav-children ((entities list) callback)
-  (libbcel--async-mapcar
+  (libbcel-util-async-mapcar
    #'libbcel-nav-children
    entities
    callback))
