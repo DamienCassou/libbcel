@@ -104,10 +104,12 @@
 
 If STRUCT-TYPE is a function, pass it the current entity-data.
 The return value must be a symbol representing the structure type
-to instantiate."
+to instantiate.  If STRUCT-TYPE is nil, the structure type to
+create is inferred from ENTITY-DATA.  Otherwise struct-type must
+be a symbol representing a structure type."
   (let ((struct-type (if (functionp struct-type)
                          (funcall struct-type entity-data)
-                       struct-type)))
+                       (or struct-type (libbcel-structs--infer-struct-type entity-data)))))
     (when struct-type
       (apply
        #'record
@@ -142,6 +144,16 @@ STRUCT-TYPE is passed unchanged to
       ('message_board 'libbcel-message-board)
       ('todoset 'libbcel-todoset)
       (_ nil))))
+(defun libbcel-structs--infer-struct-type (entity-data)
+  "Return a symbol of a structure type to instanciate for ENTITY-DATA."
+  (let ((type-name (map-elt entity-data 'type)))
+    (pcase type-name
+      ("Message::Board" 'libbcel-message-board)
+      ("Todoset" 'libbcel-todoset)
+      ("Project" 'libbcel-project)
+      ("Todolist" 'libbcel-todolist)
+      (_ (message "libbcel-structs: I don't know what the type is for `%s'" type-name)
+         nil))))
 
 (provide 'libbcel-structs)
 ;;; libbcel-structs.el ends here
