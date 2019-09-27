@@ -101,6 +101,9 @@
 (cl-defmethod libbcel-structs-url ((entity libbcel-entity))
   (libbcel--entity-url entity))
 
+(cl-defmethod libbcel-comments-count ((entity libbcel-entity))
+  (libbcel--entity-comments-count entity))
+
 (defun libbcel-structs-create-instance-from-data (struct-type entity-data)
   "Return an instance of a STRUCT-TYPE from ENTITY-DATA, an alist.
 
