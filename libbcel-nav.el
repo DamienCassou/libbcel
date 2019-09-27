@@ -80,7 +80,7 @@
   'libbcel-message)
 
 (cl-defmethod libbcel-nav--tool-child-struct-type ((_tool libbcel-todoset))
-  'libbcel-todo)
+  'libbcel-todolist)
 
 (cl-defgeneric libbcel-nav--tool-child-url-key (tool)
   "Return a symbol representing which field of TOOL contains the url to fetch its children.")
