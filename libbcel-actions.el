@@ -28,13 +28,22 @@
 
 (require 'libbcel-client)
 (require 'libbcel-structs)
+(require 'libbcel-util)
 
-(defun libbcel-actions-todo-toggle (todo &optional callback)
-  "Toggle the completed state of TODO.
-When finished, execute CALLBACK."
+(cl-defgeneric libbcel-actions-todo-toggle (entity &optional callback)
+  "Toggle the completed state of ENTITY.
+When finished, execute CALLBACK if non-nil.")
+
+(cl-defmethod libbcel-actions-todo-toggle ((todo libbcel-todo) &optional callback)
   (if (libbcel-todo-completed todo)
       (libbcel-actions-todo-uncomplete todo callback)
     (libbcel-actions-todo-complete todo callback)))
+
+(cl-defmethod libbcel-actions-todo-toggle ((todos list) &optional callback)
+  (libbcel-util-async-mapc
+   #'libbcel-actions-todo-toggle
+   todos
+   callback))
 
 (defun libbcel-actions-todo-uncomplete (todo &optional callback)
   "Set TODO as uncompleted.  When finished, execute CALLBACK."
