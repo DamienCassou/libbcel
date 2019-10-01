@@ -36,6 +36,7 @@
   (url nil :read-only t)
   (alist nil :read-only t)
   (comments-count 0 :read-only t :alist-key-name comments_count)
+  (comments-url 0 :read-only t :alist-key-name comments_url)
   (parent nil :read-only t))
 
 (cl-defstruct (libbcel-project
@@ -93,6 +94,11 @@
              :alist-transformer (lambda (data) (not (eq data :json-false))))
   (completion-url nil :read-only t :alist-key-name completion_url))
 
+(cl-defstruct (libbcel-comment
+               (:include libbcel-entity)
+               (:constructor libbcel-comment-create)
+               (:conc-name libbcel-comment-)))
+
 (cl-defmethod libbcel-equal ((entity1 libbcel-entity) (entity2 libbcel-entity))
   (equal (libbcel-entity-id entity1) (libbcel-entity-id entity2)))
 
@@ -144,6 +150,7 @@ The structures to instanciate are decided by `libbcel-structs--infer-struct-type
           ("Project" 'libbcel-project)
           ("Todolist" 'libbcel-todolist)
           ("Todo" 'libbcel-todo)
+          ("Comment" 'libbcel-comment)
           (_ (message "libbcel-structs: I don't know what the type is for `%s'" type-name)
              nil))
       (when (map-contains-key entity-data 'dock)

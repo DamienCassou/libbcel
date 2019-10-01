@@ -33,6 +33,8 @@
 (require 'libbcel-client)
 (require 'libbcel-util)
 
+(require 'subr-x)
+
 (cl-defgeneric libbcel-nav-children (entity callback)
   "Execute CALLBACK with the children of ENTITY as parameter.")
 
@@ -75,6 +77,16 @@
    (list nil '((completed . "true")))
    (lambda (todos)
      (funcall callback (apply #'seq-concatenate 'list todos)))))
+
+(cl-defgeneric libbcel-nav-comments ((entity libbcel-entity) callback)
+  "Execute CALLBACK with a list of ENTITY's comments."
+  (if (and (> (libbcel-entity-comments-count entity) 0)
+           (not (string-empty-p (libbcel-entity-comments-url entity))))
+      (libbcel-client-get-url
+       (libbcel-entity-comments-url entity)
+       (lambda (comments-data)
+         (funcall callback (libbcel-structs-create-instances-from-data comments-data entity))))
+    (funcall callback nil)))
 
 (provide 'libbcel-nav)
 ;;; libbcel-nav.el ends here
