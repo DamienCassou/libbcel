@@ -41,7 +41,7 @@
 (cl-defmethod libbcel-nav-children ((entity (eql projects)) callback)
   "Execute CALLBACK with the list of all projects as parameter."
   (libbcel-client-get-path
-   "/projects.json"
+   "projects.json"
    (lambda (projects-data)
      (funcall callback
               (libbcel-structs-create-instances-from-data projects-data entity)))))
