@@ -106,6 +106,11 @@
            :alist-transformer (lambda (data)
                                 (libbcel-structs-create-instance-from-data data))))
 
+(cl-defstruct (libbcel-person
+               (:include libbcel-entity)
+               (:constructor libbcel-person-create)
+               (:conc-name libbcel-person-)))
+
 (cl-defmethod libbcel-equal ((entity1 libbcel-entity) (entity2 libbcel-entity))
   (equal (libbcel-entity-id entity1) (libbcel-entity-id entity2)))
 
@@ -160,8 +165,9 @@ The structures to instanciate are decided by `libbcel-structs--infer-struct-type
           ("Comment" 'libbcel-comment)
           (_ (message "libbcel-structs: I don't know what the type is for `%s'" type-name)
              nil))
-      (when (map-contains-key entity-data 'dock)
-        'libbcel-project))))
+      (cond
+       ((map-contains-key entity-data 'dock) 'libbcel-project)
+       ((map-contains-key entity-data 'personable_type) 'libbcel-person)))))
 
 (provide 'libbcel-structs)
 ;;; libbcel-structs.el ends here
