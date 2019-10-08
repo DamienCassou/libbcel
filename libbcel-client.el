@@ -57,6 +57,7 @@ See `libbcel-oauth-get-access-token'.
 When CALLBACK is non-nil, evaluate it with the response."
   (request
    url
+   :timeout 3
    :type "GET"
    :params params
    :headers `(("User-Agent" . "bcel (damien@cassou.me)")
