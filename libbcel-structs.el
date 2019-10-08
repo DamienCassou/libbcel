@@ -98,7 +98,13 @@
 (cl-defstruct (libbcel-comment
                (:include libbcel-entity)
                (:constructor libbcel-comment-create)
-               (:conc-name libbcel-comment-)))
+               (:conc-name libbcel-comment-))
+  (content nil :read-only t)
+  (created-at nil :read-only t :alist-key-name created_at)
+  (creator nil
+           :read-only t
+           :alist-transformer (lambda (data)
+                                (libbcel-structs-create-instance-from-data data))))
 
 (cl-defmethod libbcel-equal ((entity1 libbcel-entity) (entity2 libbcel-entity))
   (equal (libbcel-entity-id entity1) (libbcel-entity-id entity2)))
