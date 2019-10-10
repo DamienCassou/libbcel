@@ -47,6 +47,55 @@ when you are on the basecamp website."
   (or libbcel-client--oauth-store
       (setq libbcel-client--oauth-store (libbcel-oauth-get-store))))
 
+(defvar libbcel-client--log-directory (expand-file-name "libbcel-client-logs" temporary-file-directory)
+  "Temporary directory where to put communication logs.")
+
+(defun libbcel-client--make-log-subdir (url)
+  "Create a subdirectory in `libbcel-client--log-directory' to store logs for a request on URL."
+  (let* ((subdir-name (format "%s_%s"
+                              (format-time-string "%F_%H:%M:%S")
+                              (replace-regexp-in-string "/" "_" url)))
+         (subdir (expand-file-name subdir-name libbcel-client--log-directory)))
+    (make-directory subdir t)
+    subdir))
+
+(cl-defun libbcel-client-request (access-token url &rest rest &allow-other-keys)
+  "Call `request'.
+
+URL, SUCCESS, ERROR are passed to `request'."
+  (let* ((request-log-level 'trace)
+         (log-buffer-name (generate-new-buffer-name (format " *libbcel-client-%s*" url)))
+         (request-log-buffer-name log-buffer-name)
+         (log-filename (expand-file-name "request-logs" (libbcel-client--make-log-subdir url))))
+    (apply
+     #'request
+     url
+     :timeout 5
+     :headers `(("User-Agent" . "bcel (damien@cassou.me)")
+                ("Authorization" . ,(format "Bearer %s" access-token)))
+     :parser #'json-read
+     :complete (cl-function
+                (lambda (&key data error-thrown symbol-status response &allow-other-keys)
+                  (let ((save-silently t))
+                    (with-current-buffer log-buffer-name
+                      (write-file log-filename))
+                    (when data
+                      (with-temp-file (expand-file-name "data" (libbcel-client--make-log-subdir url))
+                        (insert (format "%s" data))
+                        (pp-buffer)))
+                    (when error-thrown
+                      (with-temp-file (expand-file-name (format "error:%s" (car error-thrown)) (libbcel-client--make-log-subdir url))
+                        (insert (format "%s" (cdr error-thrown)))
+                        (pp-buffer)))
+                    (when symbol-status
+                      (with-temp-file (expand-file-name (format "status:%s" symbol-status) (libbcel-client--make-log-subdir url))
+                        (insert (format "%s" symbol-status))
+                        (pp-buffer)))
+                    (with-temp-file (expand-file-name "response" (libbcel-client--make-log-subdir url))
+                      (insert (format "%s" response))
+                      (pp-buffer)))))
+     rest)))
+
 (defun libbcel-client--get-url-from-token (access-token url &optional callback params)
   "Do a GET query to Basecamp 3 API at URL.
 If PARAMS is non-nil it should be an alist that is passed to the GET request.
@@ -55,13 +104,11 @@ ACCESS-TOKEN is found in the result of the OAUTH2 authentication.
 See `libbcel-oauth-get-access-token'.
 
 When CALLBACK is non-nil, evaluate it with the response."
-  (request
+  (libbcel-client-request
+   access-token
    url
-   :timeout 3
    :type "GET"
    :params params
-   :headers `(("User-Agent" . "bcel (damien@cassou.me)")
-              ("Authorization" . ,(format "Bearer %s" access-token)))
    :parser #'json-read
    :success (cl-function (lambda (&key data &allow-other-keys)
                            (when callback
@@ -74,11 +121,10 @@ ACCESS-TOKEN is found in the result of the OAUTH2 authentication.
 See `libbcel-oauth-get-access-token'.
 
 When CALLBACK is non-nil, evaluate it with the response."
-  (request
+  (libbcel-client-request
+   access-token
    url
    :type "DELETE"
-   :headers `(("User-Agent" . "bcel (damien@cassou.me)")
-              ("Authorization" . ,(format "Bearer %s" access-token)))
    :parser #'json-read
    :success (cl-function (lambda (&key data &allow-other-keys)
                            (when callback
@@ -91,11 +137,10 @@ ACCESS-TOKEN is found in the result of the OAUTH2 authentication.
 See `libbcel-oauth-get-access-token'.
 
 When CALLBACK is non-nil, evaluate it with the response."
-  (request
+  (libbcel-client-request
+   access-token
    url
    :type "POST"
-   :headers `(("User-Agent" . "bcel (damien@cassou.me)")
-              ("Authorization" . ,(format "Bearer %s" access-token)))
    :parser #'json-read
    :success (cl-function (lambda (&key data &allow-other-keys)
                            (when callback
