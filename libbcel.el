@@ -71,6 +71,7 @@ Pass PROMPT, the elements of ENTITY and TRANSFORMER to
               (libbcel-completing-read prompt entities transformer)))))
 
 (cl-defmethod libbcel-nav-children ((entities list) callback)
+  "Execute CALLBACK with the children of all ENTITIES as parameter."
   (libbcel-util-async-mapcar
    #'libbcel-nav-children
    entities

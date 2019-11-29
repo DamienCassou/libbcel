@@ -232,15 +232,15 @@ a string such as \"http://localhost:9321\"."
          (deadline (when expires-in
                      (time-add (current-time) expires-in))))
     (when access-token
-      (map-put store :access-token access-token))
+      (setf (map-elt store :access-token) access-token))
     (when refresh-token
-      (map-put store :refresh-token refresh-token))
+      (setf (map-elt store :refresh-token) refresh-token))
     (when deadline
-      (map-put store :deadline deadline))
+      (setf (map-elt store :deadline) deadline))
     (when client-id
-      (map-put store :client-id client-id))
+      (setf (map-elt store :client-id) client-id))
     (when client-secret
-      (map-put store :client-secret client-secret)))
+      (setf (map-elt store :client-secret) client-secret)))
   (with-current-buffer (find-file-noselect libbcel-oauth-store-filename)
     (erase-buffer)
     (insert (format "%S" store))
@@ -257,8 +257,8 @@ a string such as \"http://localhost:9321\"."
                      (setf (point) (point-min))
                      (read (current-buffer)))
                  (make-hash-table :size 10))))
-    (map-put store :client-id libbcel-oauth-client-id)
-    (map-put store :client-secret libbcel-oauth-client-secret)
+    (setf (map-elt store :client-id) libbcel-oauth-client-id)
+    (setf (map-elt store :client-secret) libbcel-oauth-client-secret)
     store))
 
 (defun libbcel-oauth-get-access-token (store callback)
