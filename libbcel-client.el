@@ -59,10 +59,23 @@ when you are on the basecamp website."
     (make-directory subdir t)
     subdir))
 
+(defun libbcel-client--write-log (content filename url)
+  "Write CONTENT to FILENAME in a temporary directory based on URL.
+
+CONTENT can be anything that can be printed with `princ'."
+  (when content
+    (with-temp-file (expand-file-name filename (libbcel-client--make-log-subdir url))
+      ;; use #'format because CONTENT is not necessarily a string.
+      (insert (format "%s" content))
+      (ignore-errors (pp-buffer)))))
+
 (cl-defun libbcel-client-request (access-token url &rest rest &allow-other-keys)
   "Call `request'.
 
-URL, SUCCESS, ERROR are passed to `request'."
+URL, SUCCESS, ERROR are passed to `request'.
+
+ACCESS-TOKEN is found in the result of the OAUTH2 authentication.
+See `libbcel-oauth-get-access-token'."
   (let* ((request-log-level 'trace)
          (log-buffer-name (generate-new-buffer-name (format " *libbcel-client-%s*" url)))
          (request-log-buffer-name log-buffer-name)
@@ -79,21 +92,10 @@ URL, SUCCESS, ERROR are passed to `request'."
                   (let ((save-silently t))
                     (with-current-buffer log-buffer-name
                       (write-file log-filename))
-                    (when data
-                      (with-temp-file (expand-file-name "data" (libbcel-client--make-log-subdir url))
-                        (insert (format "%s" data))
-                        (pp-buffer)))
-                    (when error-thrown
-                      (with-temp-file (expand-file-name (format "error:%s" (car error-thrown)) (libbcel-client--make-log-subdir url))
-                        (insert (format "%s" (cdr error-thrown)))
-                        (pp-buffer)))
-                    (when symbol-status
-                      (with-temp-file (expand-file-name (format "status:%s" symbol-status) (libbcel-client--make-log-subdir url))
-                        (insert (format "%s" symbol-status))
-                        (pp-buffer)))
-                    (with-temp-file (expand-file-name "response" (libbcel-client--make-log-subdir url))
-                      (insert (format "%s" response))
-                      (pp-buffer)))))
+                    (libbcel-client--write-log data "data" url)
+                    (libbcel-client--write-log (cdr error-thrown) (format "error:%s" (car error-thrown)) url)
+                    (libbcel-client--write-log symbol-status (format "status:%s" symbol-status) url)
+                    (libbcel-client--write-log response "response" url))))
      rest)))
 
 (defun libbcel-client--get-url-from-token (access-token url &optional callback params)

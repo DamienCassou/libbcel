@@ -112,6 +112,7 @@
                (:conc-name libbcel-person-)))
 
 (cl-defmethod libbcel-equal ((entity1 libbcel-entity) (entity2 libbcel-entity))
+  "Return t iff ENTITY1 is the same entity as ENTITY2."
   (equal (libbcel-entity-id entity1) (libbcel-entity-id entity2)))
 
 (defun libbcel-structs-create-instance-from-data (entity-data &optional parent)
