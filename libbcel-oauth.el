@@ -245,6 +245,7 @@ a string such as \"http://localhost:9321\"."
     (erase-buffer)
     (insert (format "%S" store))
     (setq-local epa-file-encrypt-to libbcel-oauth-store-encryption-keys)
+    (make-directory (file-name-directory (expand-file-name libbcel-oauth-store-filename)) t)
     (save-buffer)))
 
 
