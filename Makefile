@@ -1,4 +1,4 @@
-ELPA_DEPENDENCIES=package-lint request let-alist
+ELPA_DEPENDENCIES=package-lint request
 
 ELPA_ARCHIVES=melpa gnu
 
