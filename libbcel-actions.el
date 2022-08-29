@@ -41,7 +41,7 @@ When finished, execute CALLBACK if non-nil.")
     (libbcel-actions-todo-complete todo callback)))
 
 (cl-defmethod libbcel-actions-todo-toggle ((todos list) &optional callback)
-  "Toggle the completed state of all TODOS.  When done, execute CALLBACK if non-nil."
+  "Toggle the completed state of TODOS and call CALLBACK."
   (libbcel-util-async-mapc
    #'libbcel-actions-todo-toggle
    todos
