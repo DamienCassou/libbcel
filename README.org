@@ -10,12 +10,11 @@
           <img alt="MELPA" src="https://melpa.org/packages/libbcel-badge.svg"/>
         </a>
 
-        <a href="https://gitlab.petton.fr/bcel/libbcel/commits/master">
-          <img alt="pipeline status" src="https://gitlab.petton.fr/bcel/libbcel/badges/master/pipeline.svg" />
+        <a href="https://github.com/DamienCassou/libbcel/actions">
+          <img alt="pipeline status" src="https://github.com/DamienCassou/libbcel/actions/workflows/test.yml/badge.svg" />
         </a>
       </p>
   #+END_HTML
-
 
 ** Summary
 
