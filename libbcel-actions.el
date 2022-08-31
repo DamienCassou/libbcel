@@ -59,5 +59,14 @@ When finished, execute CALLBACK if non-nil.")
    (libbcel-todo-completion-url todo)
    (when callback (lambda (_data) (funcall callback)))))
 
+(defun libbcel-actions-add-comment (entity comment &optional callback)
+  "Add COMMENT to ENTITY.  When finished, execute CALLBACK.
+
+COMMENT is a string containing an HTML content."
+  (libbcel-client-post-url
+   (map-elt entity 'comments_url)
+   callback
+   (json-encode `((content . ,comment)))))
+
 (provide 'libbcel-actions)
 ;;; libbcel-actions.el ends here
