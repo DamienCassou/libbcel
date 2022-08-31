@@ -67,5 +67,25 @@ computing for the all elements of LIST."
    list
    (lambda (_result) (funcall callback))))
 
+(defvar libbcel-util--url-regex
+  (rx "https://3.basecamp.com/"
+      (group-n 1 (one-or-more (not ?/)))
+      (group-n 2 (one-or-more anychar))
+      string-end)
+  "Regexp matching the interesting parts of a Basecamp site URL.")
+
+(defun libbcel-util-site-url-to-api-path (url)
+  "Convert URL to an API path of the same entity.
+
+URL is a string taken from the user's browser.
+
+The client id part of the URL is ignored."
+  (save-match-data
+    (when-let* (((string-match libbcel-util--url-regex url))
+                (path (match-string 2 url)))
+      (concat path ".json"))))
+
 (provide 'libbcel-util)
 ;;; libbcel-util.el ends here
+
+;; LocalWords:  Basecamp
