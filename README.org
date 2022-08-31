@@ -31,20 +31,66 @@ client id and secret, skip the next section. Otherwise, keep reading.
 
 Login to [[https://basecamp.com/]] and register an application at
 [[https://launchpad.37signals.com/integrations]]. You can use whatever
-values you want but you should at least:
+values you want but the following is mandatory:
 
+- for the website URL, you can put any URL such as your home page or
+  libbcel's repository URL;
 - check "Basecamp 3" in the "Products" section;
 - set the redirect URI as "http://localhost:9321". You can use a
   different port if you want to.
 
-You'll be assigned a client id and client secret. Save that somewhere
-so you can skip this step next time.
+You'll be assigned a client id and client secret. Save that in the
+~libbcel-oauth-client-id~ and ~libbcel-oauth-client-secret~ variables:
+
+#+begin_src emacs-lisp
+  (setq libbcel-oauth-client-id "...")
+  (setq libbcel-oauth-client-secret "...")
+#+end_src
+
+If you decided for a different redirect port than 9321, you also have
+to specify that as well:
+
+#+begin_src emacs-lisp
+  (setq libbcel-oauth-local-http-port 9321)
+#+end_src
 
 *** Authenticating
 
 You have a client id, client secret and port number for the redirect
-URI (default is 9321). 
+URI (default is 9321). The authenticating protocol requires storing
+tokens. These tokens will be stored in the file whose path is in the
+variable ~libbcel-oauth-store-filename~. The file is encrypted by
+default but you need to set your GPG identity in
+~libbcel-oauth-store-encryption-keys~. If you don't want encryption,
+you can change the value of ~libbcel-oauth-store-filename~ so it
+doesn't end with ".gpg".
 
+#+begin_src emacs-lisp
+(setq libbcel-oauth-store-encryption-keys (list "ID of your GPG key"))
+#+end_src
+
+The last variable you need to set is the account ID. This is the first
+number appearing after basecamp.com in the URL when you are on the
+Basecamp website.
+
+#+begin_src emacs-lisp
+(setq libbcel-client-account-id "...")
+#+end_src
+
+*** Trying
+
+To try the setup, execute the code below:
+
+#+begin_src emacs-lisp
+  (libbcel-client-get-path
+   "/projects.json"
+   (lambda (projects)
+     (user-error "%s projects where returned" (length projects))))
+#+end_src
+
+The first time you do that, a web browser window will open. This is
+normal. Just follow the instructions (i.e., login if not already done
+and allow access). This won't happen again.
 
 ** License
 
@@ -56,4 +102,4 @@ See [[file:COPYING][COPYING]]. Copyright (c) 2019 Damien Cassou.
   </a>
   #+END_HTML
 
-#  LocalWords:  Bcel MPD minibuffer
+#  LocalWords:  Bcel MPD minibuffer Basecamp
