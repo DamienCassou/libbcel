@@ -169,6 +169,8 @@ the URL when you are on the basecamp website."
 
 (defun libbcel-client-get-path (path &optional callback)
   "Execute CALLBACK with the result of a GET call to PATH."
+  (unless libbcel-client-account-id
+    (user-error "There should be a value in `libbcel-client-account-id', check the README"))
   (libbcel-oauth-get-access-token
    (libbcel-client--oauth-store)
    (lambda (access-token)
