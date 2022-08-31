@@ -40,10 +40,10 @@ when you are on the basecamp website."
   :group 'libbcel)
 
 (defvar libbcel-client--oauth-store nil
-  "Remembers the OAuth authentication data.")
+  "Remembers the OAUTH authentication data.")
 
 (defun libbcel-client--oauth-store ()
-  "Return the OAuth authentication data."
+  "Return the OAUTH authentication data."
   (or libbcel-client--oauth-store
       (setq libbcel-client--oauth-store (libbcel-oauth-get-store))))
 
@@ -51,7 +51,8 @@ when you are on the basecamp website."
   "Temporary directory where to put communication logs.")
 
 (defun libbcel-client--make-log-subdir (url)
-  "Create a subdirectory in `libbcel-client--log-directory' to store logs for a request on URL."
+  "Create a directory to store logs for a request on URL.
+The directory is created in `libbcel-client--log-directory'."
   (let* ((subdir-name (format "%s_%s"
                               (format-time-string "%F_%H:%M:%S")
                               (replace-regexp-in-string "/" "_" url)))
@@ -193,3 +194,5 @@ If PARAMS is non-nil it should be an alist that is passed to the GET request."
 
 (provide 'libbcel-client)
 ;;; libbcel-client.el ends here
+
+; LocalWords:  basecamp

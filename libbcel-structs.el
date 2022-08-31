@@ -148,13 +148,14 @@ ENTITIES-DATA is a list of alists.
 If PARENT is provided, set the created entity's parent to
 PARENT.  This can later be retrieved with `libbcel-entity-parent'.
 
-The structures to instanciate are decided by `libbcel-structs--infer-struct-type'."
+The structures to instantiate are decided by
+`libbcel-structs--infer-struct-type'."
   (seq-remove #'null
               (mapcar (lambda (data) (libbcel-structs-create-instance-from-data data parent))
                       entities-data)))
 
 (defun libbcel-structs--infer-struct-type (entity-data)
-  "Return a symbol of a structure type to instanciate for ENTITY-DATA."
+  "Return a symbol of a structure type to instantiate for ENTITY-DATA."
   (let ((type-name (map-elt entity-data 'type)))
     (if type-name
         (pcase type-name
@@ -172,3 +173,5 @@ The structures to instanciate are decided by `libbcel-structs--infer-struct-type
 
 (provide 'libbcel-structs)
 ;;; libbcel-structs.el ends here
+
+; LocalWords:  alist alists
