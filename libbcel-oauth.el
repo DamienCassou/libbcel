@@ -34,11 +34,11 @@
 ;;; Configuration
 
 (defgroup libbcel-oauth nil
-  "Group for OAuth authentication to Basecamp."
+  "Group for OAUTH authentication to Basecamp."
   :group 'libbcel)
 
 (defcustom libbcel-oauth-store-filename (concat user-emacs-directory "libbcel-oauth.el.gpg")
-  "Filename where Basecamp 3 OAuth tokens are stored.
+  "Filename where Basecamp 3 OAUTH tokens are stored.
 
 If the filename ends with .gpg, the file will be encrypted with
 `libbcel-oauth-store-encryption-keys' if non-nil."
@@ -49,18 +49,18 @@ If the filename ends with .gpg, the file will be encrypted with
   :type '(repeat string))
 
 (defcustom libbcel-oauth-client-id nil
-  "Set your basecamp client id here."
+  "Set your Basecamp client id here."
   :type 'string)
 
 (defcustom libbcel-oauth-client-secret nil
-  "Set your basecamp client secret here."
+  "Set your Basecamp client secret here."
   :type 'string)
 
 (defcustom libbcel-oauth-local-http-port 9321
-  "The port number used for the redirect uri.
+  "The port number used for the redirect URI.
 
 This number should be specified when defining the integration on
-the basecamp website."
+the Basecamp website."
   :type 'number)
 
 
@@ -77,7 +77,7 @@ the basecamp website."
 The port the server listens to is
 `libbcel-oauth-local-http-port'.
 
-CLIENT-ID and CLIENT-SECRET are provided by basecamp for each
+CLIENT-ID and CLIENT-SECRET are provided by Basecamp for each
 integration.
 
 CALLBACK is executed with the authentication data if the OAUTH
@@ -101,7 +101,7 @@ authentication terminates successfully."
 (defun libbcel-oauth--open-browser (client-id redirect-uri)
   "Open the user's favorite web browser so s·he can authorize libbcel.
 
-CLIENT-ID is provided by basecamp for each integration.
+CLIENT-ID is provided by Basecamp for each integration.
 
 REDIRECT-URI is specified when creating a new integration.  It
 should be a string such as \"http://localhost:9321\"."
@@ -113,7 +113,7 @@ should be a string such as \"http://localhost:9321\"."
 (defun libbcel-oauth--http-server-filter (client-id client-secret redirect-uri kill-process-fn callback process data)
   "Analyze DATA and continue the OAUTH process if DATA has a code.
 
-CLIENT-ID and CLIENT-SECRET are provided by basecamp for each
+CLIENT-ID and CLIENT-SECRET are provided by Basecamp for each
 integration.
 
 REDIRECT-URI is specified when creating a new integration.  It
@@ -151,7 +151,7 @@ client which opened the connection."
            kill-process-fn))))))
 
 (defun libbcel-oauth--http-respond (process)
-  "Respond to the http client in PROCESS that everything went well."
+  "Respond to the HTTP client in PROCESS that everything went well."
   (let ((content "<p>Everything ok, you may go back to Emacs.</p>")
         (time (current-time-string)))
 
@@ -180,11 +180,11 @@ Connection: Closed
      (lambda (data)
        (funcall callback data))
      (lambda ()
-       (user-error "Failed to refresh basecamp access token")
+       (user-error "Failed to refresh Basecamp access token")
        (funcall callback)))))
 
 (defun libbcel-oauth--send-auth-request (params success failure)
-  "Do a POST request with PARAMS on Basecamp auth URL.
+  "Do a POST request with PARAMS on Basecamp authorization URL.
 Execute SUCCESS with data upon success, or FAILURE."
   (request
    "https://launchpad.37signals.com/authorization/token"
@@ -198,7 +198,7 @@ Execute SUCCESS with data upon success, or FAILURE."
                          (funcall failure)))))
 
 (defun libbcel-oauth--redirect-uri ()
-  "Generate a local redirect-uri from `libbcel-oauth-local-http-port'.
+  "Generate a local redirect URI from `libbcel-oauth-local-http-port'.
 
 REDIRECT-URI is specified when creating a new integration.  It is
 a string such as \"http://localhost:9321\"."
@@ -258,6 +258,10 @@ a string such as \"http://localhost:9321\"."
                      (setf (point) (point-min))
                      (read (current-buffer)))
                  (make-hash-table :size 10))))
+    (when (string-empty-p libbcel-oauth-client-id)
+      (user-error "There should be a value in `libbcel-oauth-client-id', check the README"))
+    (when (string-empty-p libbcel-oauth-client-secret)
+      (user-error "There should be a value in `libbcel-oauth-client-secret', check the README"))
     (puthash :client-id libbcel-oauth-client-id store)
     (puthash :client-secret libbcel-oauth-client-secret store)
     store))
@@ -278,3 +282,5 @@ To create STORE, call `libbcel-oauth-get-store'."
 
 (provide 'libbcel-oauth)
 ;;; libbcel-oauth.el ends here
+
+;; LocalWords:  Basecamp gpg libbcel

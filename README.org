@@ -31,27 +31,32 @@ client id and secret, skip the next section. Otherwise, keep reading.
 
 Login to [[https://basecamp.com/]] and register an application at
 [[https://launchpad.37signals.com/integrations]]. You can use whatever
-values you want but the following is mandatory:
+values for most field:
 
-- for the website URL, you can put any URL such as your home page or
-  libbcel's repository URL;
-- check "Basecamp 3" in the "Products" section;
-- set the redirect URI as "http://localhost:9321". You can use a
+- For the website URL, you can put any URL you want, it doesn't
+  matter. You can for example use the URL of your website or the URL
+  of libbcel's repository.
+- Check "Basecamp 3" in the "Products" section.
+- Set the redirect URI as "http://localhost:9321". You can use a
   different port if you want to.
 
-You'll be assigned a client id and client secret. Save that in the
-~libbcel-oauth-client-id~ and ~libbcel-oauth-client-secret~ variables:
+Once the application is registered, click its name to get a client id
+and client secret. These values must be saved in Emacs so libbcel can
+access them. If your ~init.el~ is private, you can just save these
+variables inside it. If you share your ~init.el~, you will have to
+write these values in a different file that is loaded by your
+~init.el~. You should write something like this:
 
 #+begin_src emacs-lisp
-  (setq libbcel-oauth-client-id "...")
-  (setq libbcel-oauth-client-secret "...")
+  (setq libbcel-oauth-client-id "a89b23093a89b23093ffe2dd01938ffe2dd01938")
+  (setq libbcel-oauth-client-secret "8a9b23093a89b20393ffe2dd01938ffe2dd01983")
 #+end_src
 
-If you decided for a different redirect port than 9321, you also have
-to specify that as well:
+If you decided above for a redirect port different from 9321, you also
+have to specify that:
 
 #+begin_src emacs-lisp
-  (setq libbcel-oauth-local-http-port 9321)
+  (setq libbcel-oauth-local-http-port 9000) ;; default is 9321
 #+end_src
 
 *** Authenticating
@@ -66,7 +71,7 @@ you can change the value of ~libbcel-oauth-store-filename~ so it
 doesn't end with ".gpg".
 
 #+begin_src emacs-lisp
-(setq libbcel-oauth-store-encryption-keys (list "ID of your GPG key"))
+(setq libbcel-oauth-store-encryption-keys (list "8A9B23093A89B20393FFE2DD01938FFE2DD01983"))
 #+end_src
 
 The last variable you need to set is the account ID. This is the first
@@ -74,23 +79,28 @@ number appearing after basecamp.com in the URL when you are on the
 Basecamp website.
 
 #+begin_src emacs-lisp
-(setq libbcel-client-account-id "...")
+(setq libbcel-client-account-id "928734324")
 #+end_src
 
 *** Trying
 
-To try the setup, execute the code below:
+To try the setup, execute the code below (use ~M-:~ for example):
 
 #+begin_src emacs-lisp
   (libbcel-client-get-path
    "/projects.json"
    (lambda (projects)
-     (user-error "%s projects where returned" (length projects))))
+     (switch-to-buffer (get-buffer-create "*libbcel-test*"))
+     (erase-buffer)
+     (insert (format "%s projects where returned" (length projects)))))
 #+end_src
 
 The first time you do that, a web browser window will open. This is
-normal. Just follow the instructions (i.e., login if not already done
-and allow access). This won't happen again.
+normal. Login if not already done and allow access to the
+application. You should get a confirmation message in the web browser. This won't happen again.
+
+If everything went well, you will get a message with a number of
+projects after a second or two.
 
 ** License
 
