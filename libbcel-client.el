@@ -84,7 +84,6 @@ See `libbcel-oauth-get-access-token'."
     (apply
      #'request
      url
-     :timeout 5
      :headers `(("User-Agent" . "bcel (damien@cassou.me)")
                 ("Authorization" . ,(format "Bearer %s" access-token))
                 ("Content-Type" . "application/json"))
