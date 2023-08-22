@@ -36,7 +36,7 @@ values for most field:
 - For the website URL, you can put any URL you want, it doesn't
   matter. You can for example use the URL of your website or the URL
   of libbcel's repository.
-- Check "Basecamp 3" in the "Products" section.
+- Check "Basecamp 4" in the "Products" section.
 - Set the redirect URI as "http://localhost:9321". You can use a
   different port if you want to.
 
