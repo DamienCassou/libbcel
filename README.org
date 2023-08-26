@@ -104,7 +104,7 @@ projects after a second or two.
 
 ** License
 
-See [[file:COPYING][COPYING]]. Copyright (c) 2019 Damien Cassou.
+See [[file:COPYING][COPYING]]. Copyright (c) 2019-2023 Damien Cassou.
 
   #+BEGIN_HTML
   <a href="https://liberapay.com/DamienCassou/donate">
