@@ -81,7 +81,7 @@
    (lambda (todos)
      (funcall callback (apply #'seq-concatenate 'list todos)))))
 
-(cl-defgeneric libbcel-nav-comments ((entity libbcel-entity) callback)
+(cl-defgeneric libbcel-nav-comments (entity callback)
   "Execute CALLBACK with a list of ENTITY's comments."
   (if (and (> (libbcel-entity-comments-count entity) 0)
            (not (string-empty-p (libbcel-entity-comments-url entity))))
