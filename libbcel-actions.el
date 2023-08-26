@@ -1,6 +1,6 @@
 ;;; libbcel-actions.el --- Functions to act on Basecamp entities  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2019  Damien Cassou
+;; Copyright (C) 2019-2023  Damien Cassou
 
 ;; Author: Damien Cassou <damien@cassou.me>
 ;; Url: https://gitlab.petton.fr/bcel/libbcel

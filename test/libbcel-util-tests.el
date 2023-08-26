@@ -1,6 +1,6 @@
 ;;; libbcel-util-tests.el --- Tests for libbcel-util  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2022  Damien Cassou
+;; Copyright (C) 2022-2023  Damien Cassou
 
 ;; Author: Damien Cassou <damien@cassou.me>
 ;; Url: https://gitlab.petton.fr/bcel/libbcel
