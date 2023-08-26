@@ -130,7 +130,7 @@ client which opened the connection."
     (with-temp-buffer
       (erase-buffer)
       (insert data)
-      (setf (point) (point-min))
+      (goto-char (point-min))
       (when (re-search-forward (rx bol "GET /?code=" (group-n 1 (+ (not (any " ")))) " ") nil t)
         (let ((code (match-string 1)))
           (libbcel-oauth--send-auth-request
@@ -255,7 +255,7 @@ a string such as \"http://localhost:9321\"."
   "Return a `store' where Basecamp tokens should be saved."
   (let ((store (if (file-readable-p libbcel-oauth-store-filename)
                    (with-current-buffer (find-file-noselect libbcel-oauth-store-filename)
-                     (setf (point) (point-min))
+                     (goto-char (point-min))
                      (read (current-buffer)))
                  (make-hash-table :size 10))))
     (when (string-empty-p libbcel-oauth-client-id)
